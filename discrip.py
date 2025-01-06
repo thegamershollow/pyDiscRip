@@ -13,15 +13,13 @@ def drive_media_type(drivepath=None):
     context = pyudev.Context()
     a = context.list_devices(sys_name=drivepath.replace("/dev/",""))
     dev = next(iter(a))
-    # print(dev)
-    # print(dict(dev.properties))
     media_type=None
-    if dev.properties.get("ID_CDROM_MEDIA_CD", False):
-        print("CD drive contains a CD")
+    if "ID_CDROM_MEDIA_CD" in dev:
         media_type="CD"
-    elif dev.properties.get("ID_CDROM_MEDIA_DVD", False):
-        print("CD drive contains a DVD")
+    elif "ID_CDROM_MEDIA_DVD" in dev:
         media_type="DVD"
+    elif "ID_CDROM_MEDIA_BD" in dev:
+        media_type="BD"
 
     return media_type
 
@@ -47,12 +45,16 @@ def rip_disc(disc=None):
     if disc["media_type"] == "DVD":
         print("Rip as DVD")
 
+    if disc["media_type"] == "BD":
+        print("Rip as Bluray")
+
 def main():
     parser = argparse.ArgumentParser(
                     prog='pyDiscRip',
                     description='Disc ripping manager program',
                     epilog='By Shelby Jueden')
-    parser.add_argument('-c', '--csv', help="CSV file in `Drive,Dir Name,Description` format")
+    parser.add_argument('-c', '--csv', help="CSV file in `Drive,Name,Description` format")
+    parser.add_argument('-o', '--output', help="Directory to save data in")
     args = parser.parse_args()
 
     discs = rip_list_read(args.csv)
