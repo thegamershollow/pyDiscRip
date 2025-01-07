@@ -7,6 +7,7 @@ import csv
 # Hardware interfacing
 import pyudev
 
+from media_types.manager import MediaTypeManager
 
 def drive_media_type(drivepath=None):
     # Check media type in drive which will determine how it is ripped
@@ -38,15 +39,12 @@ def rip_list_read(filepath=None):
 def rip_disc(disc=None):
     # Determine disc type
     disc["media_type"] = drive_media_type(disc["Drive"])
+    media_manager = MediaTypeManager()
 
-    if disc["media_type"] == "CD":
-        print("Rip as CD")
+    media_handler = media_manager.findMediaType(disc)
 
-    if disc["media_type"] == "DVD":
-        print("Rip as DVD")
+    media_handler.rip(disc)
 
-    if disc["media_type"] == "BD":
-        print("Rip as Bluray")
 
 def main():
     parser = argparse.ArgumentParser(
@@ -60,11 +58,6 @@ def main():
     discs = rip_list_read(args.csv)
     for disc in discs:
         rip_disc(disc)
-
-    print("disc ripper")
-
-
-
 
 if __name__ == "__main__":
     main()
