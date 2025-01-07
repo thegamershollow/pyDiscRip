@@ -1,6 +1,8 @@
 #!/usr/bin/env python3
 
 import subprocess
+import libdiscid
+import musicbrainzngs
 
 from media_types.media_type import MediaType
 
@@ -76,11 +78,28 @@ class MediaTypeCD(MediaType):
 
     def fetchMetadata(self,media_sample):
         # https://python-discid.readthedocs.io/en/latest/usage/#fetching-metadata
+        musicbrainzngs.set_useragent("AkBKukU: pyDiscRip", "0.1", "akbkuku@akbkuku.com")
+
+        disc = libdiscid.read(device=media_sample["Drive"])
+        try:
+            result = musicbrainzngs.get_releases_by_discid(disc.id,
+                                                        includes=["artists"])
+        except musicbrainzngs.ResponseError:
+            print("disc not found or bad response")
+        else:
+            if result.get("disc"):
+                print("artist:\t%s" %
+                    result["disc"]["release-list"][0]["artist-credit-phrase"])
+                print("title:\t%s" % result["disc"]["release-list"][0]["title"])
+            elif result.get("cdstub"):
+                print("artist:\t" % result["cdstub"]["artist"])
+                print("title:\t" % result["cdstub"]["title"])
         return
 
     def rip(self, media_sample):
         print("Ripping as CD")
         self.countSessions(media_sample)
-        self.ripBinCue(media_sample)
+        self.fetchMetadata(media_sample)
+        #self.ripBinCue(media_sample)
 
 
