@@ -83,13 +83,14 @@ class MediaTypeCD(MediaType):
         disc = libdiscid.read(device=media_sample["Drive"])
         try:
             result = musicbrainzngs.get_releases_by_discid(disc.id,
-                                                        includes=["artists"])
+                                                        includes=["artists", "recordings"])
         except musicbrainzngs.ResponseError:
             print("disc not found or bad response")
         else:
             if result.get("disc"):
                 print("artist:\t%s" %
                     result["disc"]["release-list"][0]["artist-credit-phrase"])
+                print(result["disc"]["release-list"][0])
                 print("title:\t%s" % result["disc"]["release-list"][0]["title"])
             elif result.get("cdstub"):
                 print("artist:\t" % result["cdstub"]["artist"])
