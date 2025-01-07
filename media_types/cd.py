@@ -21,24 +21,24 @@ class MediaTypeCD(MediaType):
         self.cd_tracks=0
 
     def countSessions(self,media_sample):
-        # Sample output
-        # cdrdao disk-info --device  /dev/sr1
-        # Cdrdao version 1.2.4 - (C) Andreas Mueller <andreas@daneb.de>
-        # /dev/sr1: HL-DT-ST BD-RE WP50NB40       Rev: 1.03
-        # Using driver: Generic SCSI-3/MMC - Version 2.0 (options 0x0000)
-        #
-        # That data below may not reflect the real status of the inserted medium
-        # if a simulation run was performed before. Reload the medium in this case.
-        #
-        # CD-RW                : no
-        # Total Capacity       : n/a
-        # CD-R medium          : n/a
-        # Recording Speed      : n/a
-        # CD-R empty           : no
-        # Toc Type             : CD-DA or CD-ROM
-        # Sessions             : 2
-        # Last Track           : 23
-        # Appendable           : no
+# Sample output
+# cdrdao disk-info --device  /dev/sr1
+# Cdrdao version 1.2.4 - (C) Andreas Mueller <andreas@daneb.de>
+# /dev/sr1: HL-DT-ST BD-RE WP50NB40       Rev: 1.03
+# Using driver: Generic SCSI-3/MMC - Version 2.0 (options 0x0000)
+#
+# That data below may not reflect the real status of the inserted medium
+# if a simulation run was performed before. Reload the medium in this case.
+#
+# CD-RW                : no
+# Total Capacity       : n/a
+# CD-R medium          : n/a
+# Recording Speed      : n/a
+# CD-R empty           : no
+# Toc Type             : CD-DA or CD-ROM
+# Sessions             : 2
+# Last Track           : 23
+# Appendable           : no
         cmd = f"cdrdao disk-info --device {media_sample["Drive"]}"
 
         try:
@@ -47,7 +47,8 @@ class MediaTypeCD(MediaType):
         except subprocess.CalledProcessError as exc:
             print("Status : FAIL", exc.returncode, exc.output)
         else:
-            self.cd_sessions=int(str(result.stdout).split("Sessions             : ")[1][:1])
+            self.log("cdrdao-disk-info",result.stdout.decode("utf-8"))
+            self.cd_sessions=int(result.stdout.decode("utf-8").split("Sessions             : ")[1][:1])
             print(f"Sessions Found: {self.cd_sessions}")
 
 
@@ -88,13 +89,18 @@ class MediaTypeCD(MediaType):
             print("disc not found or bad response")
         else:
             if result.get("disc"):
+                self.log("mb-disc",result,json_output=True)
                 print("artist:\t%s" %
                     result["disc"]["release-list"][0]["artist-credit-phrase"])
                 print(result["disc"]["release-list"][0])
                 print("title:\t%s" % result["disc"]["release-list"][0]["title"])
             elif result.get("cdstub"):
+                self.log("mb-cdstub",result,json_output=True)
                 print("artist:\t" % result["cdstub"]["artist"])
                 print("title:\t" % result["cdstub"]["title"])
+                print("----------------------CONGRATS!----------------------")
+                print("You just found a cdstub entry which I couldn't find a sample of how to use. If you are not me, please make an issue on github and attatch the json log file that was just saved. For now this software cannot handle that data and you will have to do manual tagging.")
+                input("Press Enter to continue...")
         return
 
     def rip(self, media_sample):

@@ -58,6 +58,7 @@ def main():
     discs = rip_list_read(args.csv)
     for disc in discs:
         rip_disc(disc)
+        input("Change discs and press Enter to continue...")
 
 if __name__ == "__main__":
     main()
