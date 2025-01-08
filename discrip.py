@@ -38,64 +38,64 @@ def drive_media_type(drivepath=None):
 
 
 def rip_list_read(filepath=None):
-    """ Read a CSV with drive paths, BIN names, and full disc names
+    """ Read a CSV with drive paths, BIN names, and full media_sample names
 
     """
 
     # Open CSV with media samples to rip
-    discs=[]
+    media_samples=[]
     with open(filepath, newline='') as csvfile:
         reader = csv.DictReader(csvfile, skipinitialspace=True)
         for row in reader:
-            discs.append(row)
+            media_samples.append(row)
 
-    # Return a dict of disc information to rip
-    return discs
+    # Return a dict of media_sample information to rip
+    return media_samples
 
 
-def rip_disc(disc):
-    """Determine disc type
+def rip_media_sample(media_sample):
+    """Determine media_sample type
 
     """
 
     # Access the drive associated to the media to determine the type
-    disc["media_type"] = drive_media_type(disc["Drive"])
+    media_sample["media_type"] = drive_media_type(media_sample["Drive"])
 
     # Init media manager
     media_manager = MediaHandlerManager()
 
-    # Get a media handler for this type of disc
-    media_handler = media_manager.findMediaType(disc)
+    # Get a media handler for this type of media_sample
+    media_handler = media_manager.findMediaType(media_sample)
 
     # If a handler exists attempt to rip
     if media_handler is not None:
         # Rip media and store information about resulting data
-        data_outputs = media_handler.rip(disc)
+        data_outputs = media_handler.rip(media_sample)
         # Add all data to the media object
         if data_outputs is not None:
-            disc["data"]=[]
-            disc["data_processed"]=0
+            media_sample["data"]=[]
+            media_sample["data_processed"]=0
             for data in data_outputs:
-                disc["data"].append(data)
+                media_sample["data"].append(data)
 
             # Begin processing data
-            convert_data(disc)
+            convert_data(media_sample)
 
     else:
-        if disc["media_type"] is None:
-            print("Error accessing drive or disc")
+        if media_sample["media_type"] is None:
+            print("Error accessing drive or media_sample")
         else:
-            print(f"Media type \"{disc["media_type"].value}\" not supported")
+            print(f"Media type \"{media_sample["media_type"].value}\" not supported")
 
-def convert_data(disc):
+def convert_data(media_sample):
     """ Converts all possible data types until media sample if fully processed.
 
     """
 
-    while disc["data_processed"] < len(disc["data"]):
-        for data in disc["data"]:
+    while media_sample["data_processed"] < len(media_sample["data"]):
+        for data in media_sample["data"]:
             print(f"{data["data_id"].value}: {data["data_processed"]}")
-            disc["data_processed"]+=1
+            media_sample["data_processed"]+=1
 
 def main():
     parser = argparse.ArgumentParser(
@@ -106,13 +106,13 @@ def main():
     parser.add_argument('-o', '--output', help="Directory to save data in")
     args = parser.parse_args()
 
-    discs = rip_list_read(args.csv)
+    media_samples = rip_list_read(args.csv)
     rip_count = 1
-    for disc in discs:
-        rip_disc(disc)
-        if rip_count < len(discs):
+    for media_sample in media_samples:
+        rip_media_sample(media_sample)
+        if rip_count < len(media_samples):
             rip_count+=1
-            input("Change discs and press Enter to continue...")
+            input("Change media_samples and press Enter to continue...")
 
 
 if __name__ == "__main__":
