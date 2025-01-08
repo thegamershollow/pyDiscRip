@@ -9,7 +9,9 @@ import json
 import pyudev
 
 from handler.media.manager import MediaHandlerManager
+from handler.data.manager import DataHandlerManager
 from handler.media.media_handler import Media
+from handler.data.data_handler import Data
 
 def drive_media_type(drivepath=None):
     """ Check media type in drive which will determine how it is ripped
@@ -92,10 +94,32 @@ def convert_data(media_sample):
 
     """
 
+    # Init media manager
+    data_manager = DataHandlerManager()
+
+
+
     while media_sample["data_processed"] < len(media_sample["data"]):
         for data in media_sample["data"]:
+            if not data["data_processed"]:
+                # Get a media handler for this type of media_sample
+                data_handler = data_manager.findDataType(data)
+
+                # If a handler exists attempt to rip
+                if data_handler is not None:
+                    data["data_processed"] , data_outputs = data_handler.convert(data)
+
+                    if data["data_processed"]:
+                        media_sample["data_processed"]+=1
+                        if data_outputs is not None:
+                            for newdata in data_outputs:
+                                media_sample["data"].append(data)
+
+                else:
+                    print(f"No data handler found for [{data["data_id"].value}]")
+
+
             print(f"{data["data_id"].value}: {data["data_processed"]}")
-            media_sample["data_processed"]+=1
 
 def main():
     parser = argparse.ArgumentParser(

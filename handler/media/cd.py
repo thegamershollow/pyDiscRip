@@ -24,7 +24,7 @@ class MediaHandlerCD(MediaHandler):
         self.media_id=Media.CD
         self.cd_sessions=0
         self.cd_tracks=0
-        self.data_outputs=[Data.BINCUE]
+        self.data_outputs=[Data.BINCUE,Data.MUSICBRAINZ]
 
     def countSessions(self,media_sample):
 # Sample output
@@ -109,36 +109,68 @@ class MediaHandlerCD(MediaHandler):
         return datas
 
     def fetchMetadata(self,media_sample):
-        # https://python-discid.readthedocs.io/en/latest/usage/#fetching-metadata
-        musicbrainzngs.set_useragent("AkBKukU: pyDiscRip", "0.1", "akbkuku@akbkuku.com")
+        data = {
+            "data_id": Data.MUSICBRAINZ,
+            "data_dir": f"{self.project_dir}/{Data.MUSICBRAINZ.value}",
+            "data_processed": False,
+            "data_files": {
+                "JSON": f"{media_sample["Name"]}-musicbrainz.json"
+            }
+        }
 
-        disc = libdiscid.read(device=media_sample["Drive"])
-        try:
-            result = musicbrainzngs.get_releases_by_discid(disc.id,
-                                                        includes=["artists", "recordings"])
-        except musicbrainzngs.ResponseError:
-            print("disc not found or bad response")
-        else:
-            if result.get("disc"):
-                self.log("mb-disc",result,json_output=True)
-                print("artist:\t%s" %
-                    result["disc"]["release-list"][0]["artist-credit-phrase"])
-                print(result["disc"]["release-list"][0])
-                print("title:\t%s" % result["disc"]["release-list"][0]["title"])
-            elif result.get("cdstub"):
-                self.log("mb-cdstub",result,json_output=True)
-                print("artist:\t" % result["cdstub"]["artist"])
-                print("title:\t" % result["cdstub"]["title"])
-                print("----------------------CONGRATS!----------------------")
-                print("You just found a cdstub entry which I couldn't find a sample of how to use. If you are not me, please make an issue on github and attatch the json log file that was just saved. For now this software cannot handle that data and you will have to do manual tagging.")
-                input("Press Enter to continue...")
-        return
+        # Make data_dir if not there
+        if not os.path.exists(data["data_dir"]):
+            os.makedirs(data["data_dir"])
+
+        if not os.path.exists(f"{data["data_dir"]}/{data["data_files"]["JSON"]}"):
+            # https://python-discid.readthedocs.io/en/latest/usage/#fetching-metadata
+            musicbrainzngs.set_useragent("AkBKukU: pyDiscRip", "0.1", "akbkuku@akbkuku.com")
+
+            disc = libdiscid.read(device=media_sample["Drive"])
+            try:
+                result = musicbrainzngs.get_releases_by_discid(disc.id,
+                                                            includes=["artists", "recordings"])
+            except musicbrainzngs.ResponseError:
+                print("disc not found or bad response")
+            else:
+                if result.get("disc"):
+                    #self.log("mb-disc",result,json_output=True)
+                    print("artist:\t%s" %
+                        result["disc"]["release-list"][0]["artist-credit-phrase"])
+                    print(result["disc"]["release-list"][0])
+                    print("title:\t%s" % result["disc"]["release-list"][0]["title"])
+
+                    # Write data
+                    with open(f"{data["data_dir"]}/{data["data_files"]["JSON"]}", 'w', encoding="utf-8") as output:
+                        output.write(json.dumps(result, indent=4))
+
+                elif result.get("cdstub"):
+                    self.log("mb-cdstub",result,json_output=True)
+                    print("artist:\t" % result["cdstub"]["artist"])
+                    print("title:\t" % result["cdstub"]["title"])
+                    print("----------------------CONGRATS!----------------------")
+                    print("You just found a cdstub entry which I couldn't find a sample of how to use. If you are not me, please make an issue on github and attatch the json log file that was just saved. For now this software cannot handle that data and you will have to do manual tagging.")
+                    input("Press Enter to continue...")
+                    return None
+                return data
+        return data
 
     def rip(self, media_sample):
         print("Ripping as CD")
+        datas=[]
         self.setProjectDir(media_sample["Name"])
         self.countSessions(media_sample)
-        #self.fetchMetadata(media_sample)
-        return self.ripBinCue(media_sample)
+        data_output = self.fetchMetadata(media_sample)
+
+        if data_output is not None:
+                datas.append(data_output)
+
+        data_outputs = self.ripBinCue(media_sample)
+
+        if data_outputs is not None:
+            for data in data_outputs:
+                datas.append(data)
+
+        return datas
 
 
