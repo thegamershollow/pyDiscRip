@@ -1,10 +1,15 @@
 #!/usr/bin/env python3
 
+import os
 import subprocess
+import json
+from pathlib import Path
+
 import libdiscid
 import musicbrainzngs
 
-from media_types.media_type import MediaType
+from media_types.media_type import MediaType, Media
+from data_types.data_type import Data
 
 
 class MediaTypeCD(MediaType):
@@ -16,9 +21,10 @@ class MediaTypeCD(MediaType):
     def __init__(self):
         """Init with file path"""
         super().__init__()
-        self.media_id="CD"
+        self.media_id=Media.CD
         self.cd_sessions=0
         self.cd_tracks=0
+        self.data_outputs=[Data.BINCUE]
 
     def countSessions(self,media_sample):
 # Sample output
@@ -54,28 +60,53 @@ class MediaTypeCD(MediaType):
 
     def ripBinCue(self, media_sample):
 
-
+        print("Begin rip")
+        datas=[]
         sessions = 1
         while sessions <= self.cd_sessions:
+            print(f"Rip session: {sessions}")
+            data = {
+                "data_id": Data.BINCUE,
+                "data_dir": f"{self.project_dir}/{Data.BINCUE.value}/{media_sample["Name"]}-S{sessions}",
+                "data_processed": False,
+                "data_files": {
+                    "BIN": f"{media_sample["Name"]}-S{sessions}.bin",
+                    "CUE": f"{media_sample["Name"]}-S{sessions}.cue",
+                    "TOC": f"{media_sample["Name"]}-S{sessions}.toc"
+                }
+            }
 
-            cmd = f"cdrdao read-cd --read-raw --datafile \"{media_sample["Name"]}-{sessions}\".bin --device \"{media_sample["Drive"]}\" --session \"{sessions}\"  \"{media_sample["Name"]}-{sessions}\".toc"
+            # Make data_dir if not there
+            if not os.path.exists(data["data_dir"]):
+                os.makedirs(data["data_dir"])
 
-            try:
-                result = subprocess.run([cmd], shell=True)
+            # Don't re-rip BIN/TOC
+            if not os.path.exists(f"{data["data_dir"]}/{data["data_files"]["BIN"]}"):
+                # Build cdrdao command to read CD
+                cmd = f"cdrdao read-cd --read-raw --datafile \"{data["data_dir"]}/{data["data_files"]["BIN"]}\" --device \"{media_sample["Drive"]}\" --session \"{sessions}\"  \"{data["data_dir"]}/{data["data_files"]["TOC"]}\""
 
-            except subprocess.CalledProcessError as exc:
-                print("Status : FAIL", exc.returncode, exc.output)
+                try:
+                    result = subprocess.run([cmd], shell=True)
+
+                except subprocess.CalledProcessError as exc:
+                    print("Status : FAIL", exc.returncode, exc.output)
 
 
-            cmd = f"toc2cue \"{media_sample["Name"]}-{sessions}\".toc \"{media_sample["Name"]}-{sessions}\".cue"
+            # Don't re-convert CUE
+            if not os.path.exists(f"{data["data_dir"]}/{data["data_files"]["CUE"]}"):
+                # Build toc2cue command to generate CUE
+                cmd = f"toc2cue \"{data["data_dir"]}/{data["data_files"]["TOC"]}\" \"{data["data_dir"]}/{data["data_files"]["CUE"]}\""
 
-            try:
-                result = subprocess.run([cmd], shell=True)
+                try:
+                    result = subprocess.run([cmd], shell=True)
 
-            except subprocess.CalledProcessError as exc:
-                print("Status : FAIL", exc.returncode, exc.output)
+                except subprocess.CalledProcessError as exc:
+                    print("Status : FAIL", exc.returncode, exc.output)
 
             sessions += 1
+            datas.append(data)
+
+        return datas
 
     def fetchMetadata(self,media_sample):
         # https://python-discid.readthedocs.io/en/latest/usage/#fetching-metadata
@@ -105,8 +136,9 @@ class MediaTypeCD(MediaType):
 
     def rip(self, media_sample):
         print("Ripping as CD")
+        self.setProjectDir(media_sample["Name"])
         self.countSessions(media_sample)
-        self.fetchMetadata(media_sample)
-        #self.ripBinCue(media_sample)
+        #self.fetchMetadata(media_sample)
+        return self.ripBinCue(media_sample)
 
 

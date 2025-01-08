@@ -2,7 +2,12 @@
 
 import sys, os
 import json
+from enum import Enum
 from datetime import datetime
+
+class Media(Enum):
+    CD="CD"
+    DVD="DVD"
 
 class MediaType(object):
     """Base class for Media Types to handle identification and ripping
@@ -14,9 +19,12 @@ class MediaType(object):
         """Init"""
 
         self.media_id=None
-        self.project_dir="."
+        self.project_dir="./"
         self.project_timestamp=str(datetime.now().isoformat()).replace(":","-")
+        self.data_outputs=[]
 
+    def setProjectDir(self,project_dir="./"):
+        self.project_dir=project_dir
 
     def log(self,action_name,text,json_output=False):
         """logging output for data"""
@@ -49,7 +57,7 @@ class MediaType(object):
         """Check if the media sample should be handled by this type"""
 
         if media_sample["media_type"] == self.media_id:
-            print("Media type Match: "+self.media_id)
+            print("Media type Match: "+self.media_id.value)
             return True
 
         return False
