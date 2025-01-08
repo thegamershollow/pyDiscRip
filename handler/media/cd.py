@@ -8,11 +8,11 @@ from pathlib import Path
 import libdiscid
 import musicbrainzngs
 
-from media_types.media_type import MediaType, Media
-from data_types.data_type import Data
+from handler.media.media_handler import MediaHandler, Media
+from handler.data.data_handler import Data
 
 
-class MediaTypeCD(MediaType):
+class MediaHandlerCD(MediaHandler):
     """API Base for signal emitters
 
     Manages loading API keys, logging, and registering signal recievers

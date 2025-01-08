@@ -5,26 +5,37 @@ import json
 from enum import Enum
 from datetime import datetime
 
-class Media(Enum):
-    CD="CD"
-    DVD="DVD"
+from handler.handler import Handler
 
-class MediaType(object):
+class Data(Enum):
+    BINCUE="BINCUE"
+
+class DataHandler(Handler):
     """Base class for Media Types to handle identification and ripping
 
+    Data dict structure example:
+{
+    data_id: Data.BINCUE,
+    data_dir: "some-folder",
+    data_processed: False,
+    data_files: {
+        "BIN": name.bin,
+        "cue": name.cue,
+        "toc": name.toc
+    }
+}
 
     """
 
     def __init__(self):
         """Init"""
 
-        self.media_id=None
-        self.project_dir="./"
+        super().__init__()
+        self.data_id=None
+        self.project_dir="."
         self.project_timestamp=str(datetime.now().isoformat()).replace(":","-")
         self.data_outputs=[]
 
-    def setProjectDir(self,project_dir="./"):
-        self.project_dir=project_dir
 
     def log(self,action_name,text,json_output=False):
         """logging output for data"""
@@ -50,14 +61,13 @@ class MediaType(object):
         return
 
     def rip(self, media_sample):
-        print("Ripping would happen here")
+        print("Converting would happen here")
 
 
-    def mediaMatch(self, media_sample=None):
+    def dataMatch(self, media_sample=None):
         """Check if the media sample should be handled by this type"""
 
-        if media_sample["media_type"] == self.media_id:
-            print("Media type Match: "+self.media_id.value)
-            return True
+        # will need to go through a list of data dicts to check them all
+        media_sample
 
         return False

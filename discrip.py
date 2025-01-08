@@ -8,8 +8,8 @@ import json
 # Hardware interfacing
 import pyudev
 
-from media_types.manager import MediaTypeManager
-from media_types.media_type import Media
+from handler.media.manager import MediaHandlerManager
+from handler.media.media_handler import Media
 
 def drive_media_type(drivepath=None):
     """ Check media type in drive which will determine how it is ripped
@@ -62,7 +62,7 @@ def rip_disc(disc):
     disc["media_type"] = drive_media_type(disc["Drive"])
 
     # Init media manager
-    media_manager = MediaTypeManager()
+    media_manager = MediaHandlerManager()
 
     # Get a media handler for this type of disc
     media_handler = media_manager.findMediaType(disc)
