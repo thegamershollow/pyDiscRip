@@ -83,7 +83,7 @@ class MediaHandlerCD(MediaHandler):
             # Don't re-rip BIN/TOC
             if not os.path.exists(f"{data["data_dir"]}/{data["data_files"]["BIN"]}"):
                 # Build cdrdao command to read CD
-                cmd = f"cdrdao read-cd --read-raw --datafile \"{data["data_dir"]}/{data["data_files"]["BIN"]}\" --device \"{media_sample["Drive"]}\" --session \"{sessions}\"  \"{data["data_dir"]}/{data["data_files"]["TOC"]}\""
+                cmd = f"cdrdao read-cd --read-raw --datafile \"{data["data_dir"]}/{data["data_files"]["BIN"]}\" --device \"{media_sample["Drive"]}\" --session \"{sessions}\"  --driver generic-mmc-raw:0x20000 \"{data["data_dir"]}/{data["data_files"]["TOC"]}\""
 
                 try:
                     result = subprocess.run([cmd], shell=True)
@@ -112,7 +112,7 @@ class MediaHandlerCD(MediaHandler):
         data = {
             "data_id": Data.MUSICBRAINZ,
             "data_dir": f"{self.project_dir}/{Data.MUSICBRAINZ.value}",
-            "data_processed": False,
+            "data_processed": True, # Marked true because this is used by other handlers only
             "data_files": {
                 "JSON": f"{media_sample["Name"]}-musicbrainz.json"
             }
@@ -126,7 +126,11 @@ class MediaHandlerCD(MediaHandler):
             # https://python-discid.readthedocs.io/en/latest/usage/#fetching-metadata
             musicbrainzngs.set_useragent("AkBKukU: pyDiscRip", "0.1", "akbkuku@akbkuku.com")
 
-            disc = libdiscid.read(device=media_sample["Drive"])
+            try:
+                disc = libdiscid.read(device=media_sample["Drive"])
+            except libdiscid.exceptions.DiscError:
+                print("no actual audio tracks on disc: CDROM or DVD?")
+                return None
             try:
                 result = musicbrainzngs.get_releases_by_discid(disc.id,
                                                             includes=["artists", "recordings"])

@@ -10,6 +10,7 @@ from handler.handler import Handler
 class Data(Enum):
     BINCUE="BINCUE"
     MUSICBRAINZ="MUSICBRAINZ"
+    WAV="WAV"
     FLAC="FLAC"
     ISO9660="ISO9660"
 

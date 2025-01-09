@@ -98,8 +98,8 @@ def convert_data(media_sample):
     data_manager = DataHandlerManager()
 
 
-
-    while media_sample["data_processed"] < len(media_sample["data"]):
+    data_processed=0
+    while data_processed < len(media_sample["data"]):
         for data in media_sample["data"]:
             if not data["data_processed"]:
                 # Get a media handler for this type of media_sample
@@ -107,16 +107,14 @@ def convert_data(media_sample):
 
                 # If a handler exists attempt to rip
                 if data_handler is not None:
-                    data["data_processed"] , data_outputs = data_handler.convert(data)
-
-                    if data["data_processed"]:
-                        media_sample["data_processed"]+=1
-                        if data_outputs is not None:
-                            for newdata in data_outputs:
-                                media_sample["data"].append(data)
+                    # Pass entire media sample to converter to support conversion using multiple data sources at once
+                    media_sample = data_handler.convert(media_sample)
+                    data_processed+=1
 
                 else:
                     print(f"No data handler found for [{data["data_id"].value}]")
+            else:
+                data_processed+=1
 
 
             print(f"{data["data_id"].value}: {data["data_processed"]}")
