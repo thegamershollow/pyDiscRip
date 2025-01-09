@@ -67,7 +67,7 @@ class DataHandlerBINCUE(DataHandler):
         if len(wavs) > 0:
 
             for wav in wavs:
-                data_wav["data_files"]["WAV"].append(f"{wav.replace(data_wav["data_dir"],"")}")
+                data_wav["data_files"]["WAV"].append(f"{wav.replace(data_wav["data_dir"]+"/","")}")
 
         isos = glob.glob(f"{data_wav["data_dir"]}/*.iso") + glob.glob(f"{data_iso["data_dir"]}/*.iso")
         if len(isos) > 0:

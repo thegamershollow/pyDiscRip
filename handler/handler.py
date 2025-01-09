@@ -1,10 +1,11 @@
 #!/usr/bin/env python3
 
-import sys, os
+import sys, os,re
 import json
 from enum import Enum
 from datetime import datetime
 
+import unidecode
 
 class Handler(object):
     """Base class for Media and Data Types to handle identification data
@@ -20,6 +21,9 @@ class Handler(object):
         self.project_dir="./"
         self.project_timestamp=str(datetime.now().isoformat()).replace(":","-")
         self.data_outputs=[]
+
+    def cleanFilename(self, filename_raw):
+        return re.sub("[\\/\\\\\\&:\\\"<>\?\*|]","-", unidecode.unidecode(filename_raw))
 
     def setProjectDir(self,project_dir="./"):
         self.project_dir=project_dir
