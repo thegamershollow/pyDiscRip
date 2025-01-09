@@ -108,7 +108,6 @@ def convert_data(media_sample):
             if data_handler is not None:
                 # Pass entire media sample to converter to support conversion using multiple data sources at once
                 media_sample = data_handler.convert(media_sample)
-                data_processed+=1
 
             else:
                 print(f"No data handler found for [{data["data_id"].value}]")

@@ -24,17 +24,19 @@ class DataHandlerBINCUE(DataHandler):
     def convertBINCUE(self,data_in):
         data_wav = {
             "data_id": Data.WAV,
+            "processed_by": [],
             "data_dir": f"{self.project_dir}/{Data.WAV.value}/{data_in["data_files"]["BIN"].replace(".bin","")}",
             "data_files": {
-                "WAV": "track01.wav"
+                "WAV": []
             }
         }
 
         data_iso = {
             "data_id": Data.ISO9660,
+            "processed_by": [],
             "data_dir": f"{self.project_dir}/{Data.ISO9660.value}/{data_in["data_files"]["BIN"].replace(".bin","")}",
             "data_files": {
-                "ISO": "track01.iso"
+                "ISO": []
             }
         }
 
@@ -56,23 +58,29 @@ class DataHandlerBINCUE(DataHandler):
 
             try:
                 result = subprocess.run([cmd], shell=True)
-                wavs = glob.glob(f"{data_wav["data_dir"]}/*.wav")
-                if len(wavs) > 0:
-                    data_wav["data_files"] = wavs
-
-                isos = glob.glob(f"{data_wav["data_dir"]}/*.iso")
-                if len(isos) > 0:
-                    data_iso["data_files"] = wavs
-
-                    for iso in isos:
-                        os.rename(
-                            iso,
-                            f"{data_iso["data_dir"]}/{iso.replace(data_wav["data_dir"],"")}")
-
-                return [data_wav,data_iso]
 
             except subprocess.CalledProcessError as exc:
                 print("Status : FAIL", exc.returncode, exc.output)
+
+
+        wavs = glob.glob(f"{data_wav["data_dir"]}/*.wav")
+        if len(wavs) > 0:
+            data_wav["data_files"]["WAV"] = []
+
+            for wav in wavs:
+                data_wav["data_files"]["WAV"].append(f"{wav.replace(data_wav["data_dir"],"")}")
+
+        isos = glob.glob(f"{data_wav["data_dir"]}/*.iso")
+        if len(isos) > 0:
+            data_iso["data_files"]["ISO"] = []
+
+            for iso in isos:
+                data_iso["data_files"]["ISO"].append(f"{iso.replace(data_wav["data_dir"],"")}")
+                os.rename(
+                    iso,
+                    f"{data_iso["data_dir"]}/{iso.replace(data_wav["data_dir"],"")}")
+
+        return [data_wav,data_iso]
 
 
     def convert(self, media_sample):
@@ -83,10 +91,12 @@ class DataHandlerBINCUE(DataHandler):
         # check if resulting ISO is UDF or ISO9660
         for data in media_sample["data"]:
             if data["data_id"] == self.data_id:
-                data_outputs = self.convertBINCUE(data)
+                if self.data_id not in data["processed_by"]:
+                    data_outputs = self.convertBINCUE(data)
 
-                if data_outputs is not None:
-                    for data in data_outputs:
-                        media_sample["data"].append(data)
+                    if data_outputs is not None:
+                        data["processed_by"].append(self.data_id)
+                        for data in data_outputs:
+                            media_sample["data"].append(data)
 
         return media_sample

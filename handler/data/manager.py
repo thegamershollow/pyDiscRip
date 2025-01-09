@@ -12,6 +12,7 @@ class DataHandlerManager(object):
         super().__init__()
         self.data_types={}
         self.data_types["BINCUE"] = DataHandlerBINCUE()
+        self.data_types["ISO9660"] = DataHandlerISO9660()
 
     def findDataType(self,data):
 

@@ -67,6 +67,7 @@ class MediaHandlerCD(MediaHandler):
             print(f"Rip session: {sessions}")
             data = {
                 "data_id": Data.BINCUE,
+                "processed_by": [],
                 "data_dir": f"{self.project_dir}/{Data.BINCUE.value}/{media_sample["Name"]}-S{sessions}",
                 "data_files": {
                     "BIN": f"{media_sample["Name"]}-S{sessions}.bin",
@@ -110,6 +111,7 @@ class MediaHandlerCD(MediaHandler):
     def fetchMetadata(self,media_sample):
         data = {
             "data_id": Data.MUSICBRAINZ,
+            "processed_by": [],
             "data_dir": f"{self.project_dir}/{Data.MUSICBRAINZ.value}",
             "data_files": {
                 "JSON": f"{media_sample["Name"]}-musicbrainz.json"
