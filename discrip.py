@@ -76,7 +76,6 @@ def rip_media_sample(media_sample):
         # Add all data to the media object
         if data_outputs is not None:
             media_sample["data"]=[]
-            media_sample["data_processed"]=0
             for data in data_outputs:
                 media_sample["data"].append(data)
 
@@ -100,24 +99,20 @@ def convert_data(media_sample):
 
     data_processed=0
     while data_processed < len(media_sample["data"]):
+        data_processed = len(media_sample["data"])
         for data in media_sample["data"]:
-            if not data["data_processed"]:
-                # Get a media handler for this type of media_sample
-                data_handler = data_manager.findDataType(data)
+            # Get a media handler for this type of media_sample
+            data_handler = data_manager.findDataType(data)
 
-                # If a handler exists attempt to rip
-                if data_handler is not None:
-                    # Pass entire media sample to converter to support conversion using multiple data sources at once
-                    media_sample = data_handler.convert(media_sample)
-                    data_processed+=1
-
-                else:
-                    print(f"No data handler found for [{data["data_id"].value}]")
-            else:
+            # If a handler exists attempt to rip
+            if data_handler is not None:
+                # Pass entire media sample to converter to support conversion using multiple data sources at once
+                media_sample = data_handler.convert(media_sample)
                 data_processed+=1
 
+            else:
+                print(f"No data handler found for [{data["data_id"].value}]")
 
-            print(f"{data["data_id"].value}: {data["data_processed"]}")
 
 def main():
     parser = argparse.ArgumentParser(

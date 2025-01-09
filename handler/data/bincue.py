@@ -23,7 +23,6 @@ class DataHandlerBINCUE(DataHandler):
         data_wav = {
             "data_id": Data.WAV,
             "data_dir": f"{self.project_dir}/{Data.WAV.value}/{data_in["data_files"]["BIN"].replace(".bin","")}",
-            "data_processed": False,
             "data_files": {
                 "WAV": "track01.wav"
             }
@@ -32,7 +31,6 @@ class DataHandlerBINCUE(DataHandler):
         data_iso = {
             "data_id": Data.ISO9660,
             "data_dir": f"{self.project_dir}/{Data.ISO9660.value}/{data_in["data_files"]["BIN"].replace(".bin","")}",
-            "data_processed": False,
             "data_files": {
                 "ISO": "track01.iso"
             }
@@ -60,12 +58,10 @@ class DataHandlerBINCUE(DataHandler):
                         f"{data_wav["data_dir"]}/{data_iso["data_files"]["ISO"]}",
                         f"{data_iso["data_dir"]}/{data_iso["data_files"]["ISO"]}")
 
-                data_in["data_processed"] = True
 
             except subprocess.CalledProcessError as exc:
                 print("Status : FAIL", exc.returncode, exc.output)
-        else:
-            data_in["data_processed"] = True
+
 
     def convert(self, media_sample):
         print("Converting BINCUE to FLAC and ISO9660")
@@ -74,9 +70,8 @@ class DataHandlerBINCUE(DataHandler):
 
         # check if resulting ISO is UDF or ISO9660
         for data in media_sample["data"]:
-            if not data["data_processed"]:
-                if data["data_id"] == self.data_id:
-                    print(f"Checking: {data["data_dir"]}/{data["data_files"]["BIN"]}")
-                    self.convertBINCUE(data)
+            if data["data_id"] == self.data_id:
+                print(f"Checking: {data["data_dir"]}/{data["data_files"]["BIN"]}")
+                self.convertBINCUE(data)
 
         return media_sample

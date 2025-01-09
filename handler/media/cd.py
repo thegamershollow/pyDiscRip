@@ -68,7 +68,6 @@ class MediaHandlerCD(MediaHandler):
             data = {
                 "data_id": Data.BINCUE,
                 "data_dir": f"{self.project_dir}/{Data.BINCUE.value}/{media_sample["Name"]}-S{sessions}",
-                "data_processed": False,
                 "data_files": {
                     "BIN": f"{media_sample["Name"]}-S{sessions}.bin",
                     "CUE": f"{media_sample["Name"]}-S{sessions}.cue",
@@ -112,7 +111,6 @@ class MediaHandlerCD(MediaHandler):
         data = {
             "data_id": Data.MUSICBRAINZ,
             "data_dir": f"{self.project_dir}/{Data.MUSICBRAINZ.value}",
-            "data_processed": True, # Marked true because this is used by other handlers only
             "data_files": {
                 "JSON": f"{media_sample["Name"]}-musicbrainz.json"
             }
