@@ -65,26 +65,25 @@ class DataHandlerBINCUE(DataHandler):
 
         wavs = glob.glob(f"{data_wav["data_dir"]}/*.wav")
         if len(wavs) > 0:
-            data_wav["data_files"]["WAV"] = []
 
             for wav in wavs:
                 data_wav["data_files"]["WAV"].append(f"{wav.replace(data_wav["data_dir"],"")}")
 
-        isos = glob.glob(f"{data_wav["data_dir"]}/*.iso")
+        isos = glob.glob(f"{data_wav["data_dir"]}/*.iso") + glob.glob(f"{data_iso["data_dir"]}/*.iso")
         if len(isos) > 0:
-            data_iso["data_files"]["ISO"] = []
 
             for iso in isos:
+                print(f"Working on: {iso}")
                 data_iso["data_files"]["ISO"].append(f"{iso.replace(data_wav["data_dir"],"")}")
-                os.rename(
-                    iso,
-                    f"{data_iso["data_dir"]}/{iso.replace(data_wav["data_dir"],"")}")
+                if "WAV" in iso:
+                    os.rename(
+                        iso,
+                        f"{data_iso["data_dir"]}/{iso.replace(data_wav["data_dir"],"")}")
 
         return [data_wav,data_iso]
 
 
     def convert(self, media_sample):
-        print("Converting BINCUE to FLAC and ISO9660")
 
         self.setProjectDir(media_sample["Name"])
 
@@ -92,11 +91,12 @@ class DataHandlerBINCUE(DataHandler):
         for data in media_sample["data"]:
             if data["data_id"] == self.data_id:
                 if self.data_id not in data["processed_by"]:
+                    print("Converting BINCUE to FLAC and ISO9660")
                     data_outputs = self.convertBINCUE(data)
 
                     if data_outputs is not None:
                         data["processed_by"].append(self.data_id)
-                        for data in data_outputs:
-                            media_sample["data"].append(data)
+                        for data_new in data_outputs:
+                            media_sample["data"].append(data_new)
 
         return media_sample
