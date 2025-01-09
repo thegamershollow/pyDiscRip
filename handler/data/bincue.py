@@ -2,6 +2,8 @@
 
 import subprocess
 import os
+import glob
+import json
 
 from handler.data.data_handler import DataHandler, Data
 
@@ -39,25 +41,35 @@ class DataHandlerBINCUE(DataHandler):
         # Make data_dir if not there
         if not os.path.exists(data_wav["data_dir"]):
             os.makedirs(data_wav["data_dir"])
+        # Make data_dir if not there
+        if not os.path.exists(data_iso["data_dir"]):
+            os.makedirs(data_iso["data_dir"])
 
         # Don't re-convert CUE
-        if not (
-            os.path.exists(f"{data_wav["data_dir"]}/{data_wav["data_files"]["WAV"]}") or
-            os.path.exists(f"{data_iso["data_dir"]}/{data_iso["data_files"]["ISO"]}")
-            ):
+        wavs = glob.glob(f"{data_wav["data_dir"]}/*.wav")
+        isos = glob.glob(f"{data_iso["data_dir"]}/*.iso")
+
+
+        if len(wavs) == 0 and len(isos) == 0 :
             # Build toc2cue command to generate CUE
             cmd = f"bchunk -w {data_in["data_dir"]}/{data_in["data_files"]["BIN"]} {data_in["data_dir"]}/{data_in["data_files"]["CUE"]} {data_wav["data_dir"]}/track"
 
             try:
                 result = subprocess.run([cmd], shell=True)
-                if os.path.exists(f"{data_wav["data_dir"]}/{data_iso["data_files"]["ISO"]}"):
-                    # Make data_dir if not there
-                    if not os.path.exists(data_iso["data_dir"]):
-                        os.makedirs(data_iso["data_dir"])
-                    os.rename(
-                        f"{data_wav["data_dir"]}/{data_iso["data_files"]["ISO"]}",
-                        f"{data_iso["data_dir"]}/{data_iso["data_files"]["ISO"]}")
+                wavs = glob.glob(f"{data_wav["data_dir"]}/*.wav")
+                if len(wavs) > 0:
+                    data_wav["data_files"] = wavs
 
+                isos = glob.glob(f"{data_wav["data_dir"]}/*.iso")
+                if len(isos) > 0:
+                    data_iso["data_files"] = wavs
+
+                    for iso in isos:
+                        os.rename(
+                            iso,
+                            f"{data_iso["data_dir"]}/{iso.replace(data_wav["data_dir"],"")}")
+
+                return [data_wav,data_iso]
 
             except subprocess.CalledProcessError as exc:
                 print("Status : FAIL", exc.returncode, exc.output)
@@ -71,7 +83,10 @@ class DataHandlerBINCUE(DataHandler):
         # check if resulting ISO is UDF or ISO9660
         for data in media_sample["data"]:
             if data["data_id"] == self.data_id:
-                print(f"Checking: {data["data_dir"]}/{data["data_files"]["BIN"]}")
-                self.convertBINCUE(data)
+                data_outputs = self.convertBINCUE(data)
+
+                if data_outputs is not None:
+                    for data in data_outputs:
+                        media_sample["data"].append(data)
 
         return media_sample

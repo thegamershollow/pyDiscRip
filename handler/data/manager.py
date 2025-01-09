@@ -4,6 +4,7 @@
 from handler.data.data_handler import Data
 
 from handler.data.bincue import DataHandlerBINCUE
+from handler.data.iso9660 import DataHandlerBINCUE
 
 class DataHandlerManager(object):
 
