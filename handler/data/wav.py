@@ -28,9 +28,15 @@ class DataHandlerWAV(DataHandler):
         tracks = None
         metadata = {}
         data_files = {}
+        release = {}
         with open(f"{data_meta["data_dir"]}/{data_meta["data_files"]["JSON"]}", encoding="utf-8") as f:
             json_data = json.load(f)
-            tracks = json_data["disc"]["release-list"][0]["medium-list"][0]["track-list"]
+            discid = json_data["disc"]["id"]
+            for medium in json_data["disc"]["release-list"][0]["medium-list"]:
+                for disc in medium["disc-list"]:
+                    if disc["id"] == discid:
+                        release = medium
+            tracks = release["track-list"]
 
             metadata = {
                 "metadata:g:1": f"artist={json_data["disc"]["release-list"][0]["artist-credit-phrase"]}",

@@ -128,6 +128,7 @@ class MediaHandlerCD(MediaHandler):
 
             try:
                 disc = libdiscid.read(device=media_sample["Drive"])
+                self.log("disc.id",disc.id)
             except libdiscid.exceptions.DiscError:
                 print("no actual audio tracks on disc: CDROM or DVD?")
                 return None
