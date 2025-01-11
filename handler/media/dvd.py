@@ -26,20 +26,20 @@ class MediaHandlerDVD(MediaHandler):
         data = {
             "data_id": Data.ISO9660,
             "processed_by": [],
-            "data_dir": f"{self.project_dir}/{Data.ISO9660.value}",
+            "data_dir": f"{self.project_dir}/{Data.ISO9660.value}/{media_sample["Name"]}",
             "data_files": {
-                "ISO": f"{media_sample["Name"]}.iso"
+                "ISO": [f"{media_sample["Name"]}.iso"]
             }
         }
 
-        if not os.path.exists(f"{data["data_dir"]}/{data["data_files"]["ISO"]}"):
+        if not os.path.exists(f"{data["data_dir"]}/{data["data_files"]["ISO"][0]}"):
             # Make data_dir if not there
             if not os.path.exists(data["data_dir"]):
                 os.makedirs(data["data_dir"])
 
-            cmd1 = f"ddrescue -b 2048 -n -v \"{media_sample["Drive"]}\" \"{data["data_dir"]}/{data["data_files"]["ISO"]}\" \"{data["data_dir"]}/mapfile\"  | tee -a ../$logs/dvd-ddrescue.log"
-            cmd2 = f"ddrescue -b 2048 -d -r 3 -v \"{media_sample["Drive"]}\" \"{data["data_dir"]}/{data["data_files"]["ISO"]}\" \"{data["data_dir"]}/mapfile\"  | tee -a ../$logs/dvd-ddrescue.log"
-            cmd3 = f"ddrescue -b 2048 -d -R -r 3 -v \"{media_sample["Drive"]}\" \"{data["data_dir"]}/{data["data_files"]["ISO"]}\" \"{data["data_dir"]}/mapfile\"  | tee -a ../$logs/dvd-ddrescue.log"
+            cmd1 = f"ddrescue -b 2048 -n -v \"{media_sample["Drive"]}\" \"{data["data_dir"]}/{data["data_files"]["ISO"][0]}\" \"{data["data_dir"]}/mapfile\"  | tee -a ../$logs/dvd-ddrescue.log"
+            cmd2 = f"ddrescue -b 2048 -d -r 3 -v \"{media_sample["Drive"]}\" \"{data["data_dir"]}/{data["data_files"]["ISO"][0]}\" \"{data["data_dir"]}/mapfile\"  | tee -a ../$logs/dvd-ddrescue.log"
+            cmd3 = f"ddrescue -b 2048 -d -R -r 3 -v \"{media_sample["Drive"]}\" \"{data["data_dir"]}/{data["data_files"]["ISO"][0]}\" \"{data["data_dir"]}/mapfile\"  | tee -a ../$logs/dvd-ddrescue.log"
 
             try:
                 result = subprocess.run([cmd1], shell=True)
@@ -58,8 +58,7 @@ class MediaHandlerDVD(MediaHandler):
         self.setProjectDir(media_sample["Name"])
 
         # check if resulting ISO is UDF or ISO9660
-        data_output = self.ripDVD(media_sample)
+        return [self.ripDVD(media_sample)]
 
-        if data_output is not None:
-            datas.append(data_output)
+
 

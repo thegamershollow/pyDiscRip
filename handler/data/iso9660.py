@@ -27,7 +27,7 @@ class DataHandlerISO9660(DataHandler):
             data_files = {
                 "data_id": Data.Z_FILES,
                 "processed_by": [],
-                "data_dir": f"{iso.replace(".iso","")}",
+                "data_dir": f"{data["data_dir"]}/{iso.replace(".iso","")}",
                 "data_files": {
                     "Z_FILES": f"{iso.replace(".iso","")}"
                 }
@@ -36,13 +36,11 @@ class DataHandlerISO9660(DataHandler):
             # Make data_dir if not there
             if not os.path.exists(data_files["data_dir"]):
                 os.makedirs(data_files["data_dir"])
-            else:
-                return data_files
 
             print(f"Working on: {iso}")
 
             # Build 7z command to extract files
-            cmd = f"7z -y x {iso} -o{data_files["data_dir"]}"
+            cmd = f"7z -y x {data["data_dir"]}/{iso} -o{data_files["data_dir"]}"
 
             try:
                 result = subprocess.run([cmd], shell=True)
