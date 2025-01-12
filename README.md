@@ -5,6 +5,10 @@ Automate ripping optical discs and extracting data
 
 This program takes in a CSV as a parameter that holds data about what drive a media sample is in as well as a name and description.
 
+## Missing Featires
+
+ - Pre-gap detection and ripping (would be audio only so can go direct to WAV)
+
 ## Errata
 
 ### FLAC + Musicbrainz
