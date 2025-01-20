@@ -80,6 +80,12 @@ class DataHandlerBINCUE(DataHandler):
                         iso,
                         f"{data_iso["data_dir"]}/{iso.replace(data_wav["data_dir"]+"/","")}")
 
+        if len(wavs) == 0:
+            data_wav = None
+
+        if len(isos) == 0:
+            data_iso = None
+
         return [data_wav,data_iso]
 
 
@@ -97,6 +103,7 @@ class DataHandlerBINCUE(DataHandler):
                     if data_outputs is not None:
                         data["processed_by"].append(self.data_id)
                         for data_new in data_outputs:
-                            media_sample["data"].append(data_new)
+                            if data_new is not None:
+                                media_sample["data"].append(data_new)
 
         return media_sample
