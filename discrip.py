@@ -4,6 +4,7 @@
 import argparse
 import csv
 import json
+import sys
 
 # Hardware interfacing
 import pyudev
@@ -55,7 +56,21 @@ def rip_list_read(filepath=None):
     return media_samples
 
 
-def rip_media_sample(media_sample):
+def config_read(filepath=None):
+    """ Read a JSON with config parameters for media and data handlers
+
+    """
+
+    # Open JSON to read config data
+    config_data={}
+    with open(filepath, newline='') as jsonfile:
+        config_data = json.load(jsonfile)
+
+    # Return a dict of config data
+    return config_data
+
+
+def rip_media_sample(media_sample,config_data):
     """Determine media_sample type
 
     """
@@ -69,8 +84,11 @@ def rip_media_sample(media_sample):
     # Get a media handler for this type of media_sample
     media_handler = media_manager.findMediaType(media_sample)
 
+
     # If a handler exists attempt to rip
     if media_handler is not None:
+        # Setup config
+        media_handler.config(config_data)
         # Rip media and store information about resulting data
         data_outputs = media_handler.rip(media_sample)
         # Add all data to the media object
@@ -80,7 +98,7 @@ def rip_media_sample(media_sample):
                 media_sample["data"].append(data)
 
             # Begin processing data
-            convert_data(media_sample)
+            convert_data(media_sample,config_data)
 
     else:
         if media_sample["media_type"] is None:
@@ -88,7 +106,7 @@ def rip_media_sample(media_sample):
         else:
             print(f"Media type \"{media_sample["media_type"].value}\" not supported")
 
-def convert_data(media_sample):
+def convert_data(media_sample,config_data):
     """ Converts all possible data types until media sample if fully processed.
 
     """
@@ -96,6 +114,7 @@ def convert_data(media_sample):
     # Init media manager
     data_manager = DataHandlerManager()
 
+    # Setup config
 
     data_processed=0
     while data_processed < len(media_sample["data"]):
@@ -106,6 +125,8 @@ def convert_data(media_sample):
 
             # If a handler exists attempt to rip
             if data_handler is not None:
+                # Setup config
+                data_handler.config(config_data)
                 # Pass entire media sample to converter to support conversion using multiple data sources at once
                 media_sample = data_handler.convert(media_sample)
 
@@ -119,13 +140,15 @@ def main():
                     description='Disc ripping manager program',
                     epilog='By Shelby Jueden')
     parser.add_argument('-c', '--csv', help="CSV file in `Drive,Name,Description` format")
+    parser.add_argument('-f', '--config', help="Config file for ripping")
     parser.add_argument('-o', '--output', help="Directory to save data in")
     args = parser.parse_args()
 
     media_samples = rip_list_read(args.csv)
+    config_data = config_read(args.config)
     rip_count = 1
     for media_sample in media_samples:
-        rip_media_sample(media_sample)
+        rip_media_sample(media_sample,config_data)
         if rip_count < len(media_samples):
             rip_count+=1
             input("Change media_samples and press Enter to continue...")

@@ -24,6 +24,9 @@ class MediaHandlerCD(MediaHandler):
         self.media_id=Media.CD
         self.cd_sessions=0
         self.cd_tracks=0
+        self.config_data={
+            "cdrdao_driver":"generic-mmc-raw"
+        }
         self.data_outputs=[Data.BINCUE,Data.MUSICBRAINZ]
 
     def countSessions(self,media_sample):
@@ -83,8 +86,9 @@ class MediaHandlerCD(MediaHandler):
             # Don't re-rip BIN/TOC
             if not os.path.exists(f"{data["data_dir"]}/{data["data_files"]["BIN"]}"):
                 # Build cdrdao command to read CD
-                cmd = f"cdrdao read-cd --read-raw --datafile \"{data["data_dir"]}/{data["data_files"]["BIN"]}\" --device \"{media_sample["Drive"]}\" --session \"{sessions}\"  --driver generic-mmc-raw:0x20000 \"{data["data_dir"]}/{data["data_files"]["TOC"]}\""
+                cmd = f"cdrdao read-cd --read-raw --datafile \"{data["data_dir"]}/{data["data_files"]["BIN"]}\" --device \"{media_sample["Drive"]}\" --session \"{sessions}\"  --driver {self.config_data["cdrdao_driver"]}:0x20000 \"{data["data_dir"]}/{data["data_files"]["TOC"]}\""
 
+                self.log("cmd",cmd)
                 try:
                     result = subprocess.run([cmd], shell=True)
 

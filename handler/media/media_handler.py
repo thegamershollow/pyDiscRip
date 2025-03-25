@@ -7,7 +7,7 @@ from datetime import datetime
 
 from handler.handler import Handler
 
-class Media(Enum):
+class Media(str,Enum):
     CD="CD"
     DVD="DVD"
 

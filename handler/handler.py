@@ -21,6 +21,7 @@ class Handler(object):
         self.project_dir="./"
         self.project_timestamp=str(datetime.now().isoformat()).replace(":","-")
         self.data_outputs=[]
+        self.config_data=None
 
     def cleanFilename(self, filename_raw):
         return re.sub("[\\/\\\\\\&:\\\"<>\?\*|]","-", unidecode.unidecode(filename_raw))
@@ -50,4 +51,17 @@ class Handler(object):
                 output.write(text)
 
         return
+
+    def config(self, config_data):
+        """Receive configutation data for the rip"""
+
+        if self.media_id in config_data:
+            print(config_data[self.media_id])
+            for key, value in config_data[self.media_id].items():
+                print(f"{key}: {value}")
+                self.config_data[key] = value
+
+
+
+
 
