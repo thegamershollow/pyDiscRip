@@ -53,7 +53,6 @@ class MediaHandlerCD(MediaHandler):
         try:
             result = subprocess.run([cmd], shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
 
-            self.log("disk-info",str(result.stdout))
         except subprocess.CalledProcessError as exc:
             print("Status : FAIL", exc.returncode, exc.output)
         else:
