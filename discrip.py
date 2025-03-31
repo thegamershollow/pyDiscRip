@@ -140,12 +140,15 @@ def main():
                     description='Disc ripping manager program',
                     epilog='By Shelby Jueden')
     parser.add_argument('-c', '--csv', help="CSV file in `Drive,Name,Description` format")
-    parser.add_argument('-f', '--config', help="Config file for ripping")
+    parser.add_argument('-f', '--config', help="Config file for ripping",default=None)
     parser.add_argument('-o', '--output', help="Directory to save data in")
     args = parser.parse_args()
 
     media_samples = rip_list_read(args.csv)
-    config_data = config_read(args.config)
+    if args.config is not None:
+        config_data = config_read(args.config)
+    else:
+        config_data = {}
     rip_count = 1
     for media_sample in media_samples:
         rip_media_sample(media_sample,config_data)

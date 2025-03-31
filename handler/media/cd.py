@@ -25,7 +25,7 @@ class MediaHandlerCD(MediaHandler):
         self.cd_sessions=0
         self.cd_tracks=0
         self.config_data={
-            "cdrdao_driver":"generic-mmc-raw"
+            "cdrdao_driver":"generic-mmc-raw:0x20000"
         }
         self.data_outputs=[Data.BINCUE,Data.MUSICBRAINZ]
 
@@ -53,6 +53,7 @@ class MediaHandlerCD(MediaHandler):
         try:
             result = subprocess.run([cmd], shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
 
+            self.log("disk-info",str(result.stdout))
         except subprocess.CalledProcessError as exc:
             print("Status : FAIL", exc.returncode, exc.output)
         else:
@@ -86,7 +87,7 @@ class MediaHandlerCD(MediaHandler):
             # Don't re-rip BIN/TOC
             if not os.path.exists(f"{data["data_dir"]}/{data["data_files"]["BIN"]}"):
                 # Build cdrdao command to read CD
-                cmd = f"cdrdao read-cd --read-raw --datafile \"{data["data_dir"]}/{data["data_files"]["BIN"]}\" --device \"{media_sample["Drive"]}\" --session \"{sessions}\"  --driver {self.config_data["cdrdao_driver"]}:0x20000 \"{data["data_dir"]}/{data["data_files"]["TOC"]}\""
+                cmd = f"cdrdao read-cd --read-raw --datafile \"{data["data_dir"]}/{data["data_files"]["BIN"]}\" --device \"{media_sample["Drive"]}\" --session \"{sessions}\"  --driver {self.config_data["cdrdao_driver"]} \"{data["data_dir"]}/{data["data_files"]["TOC"]}\""
 
                 self.log("cmd",cmd)
                 try:
