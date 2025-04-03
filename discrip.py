@@ -139,10 +139,14 @@ def main():
                     prog='pyDiscRip',
                     description='Disc ripping manager program',
                     epilog='By Shelby Jueden')
-    parser.add_argument('-c', '--csv', help="CSV file in `Drive,Name,Description` format")
+    parser.add_argument('-c', '--csv', help="CSV file in `Drive,Name,Description` format", default=None)
     parser.add_argument('-f', '--config', help="Config file for ripping",default=None)
     parser.add_argument('-o', '--output', help="Directory to save data in")
     args = parser.parse_args()
+
+    if args.csv == "":
+        print("Drive, Name, Description")
+        sys.exit(0)
 
     media_samples = rip_list_read(args.csv)
     if args.config is not None:
