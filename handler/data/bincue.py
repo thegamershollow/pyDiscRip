@@ -49,6 +49,7 @@ class DataHandlerBINCUE(DataHandler):
 
         # Don't re-convert CUE
         wavs = glob.glob(f"{data_wav["data_dir"]}/*.wav")
+        wavs.sort()
         isos = glob.glob(f"{data_iso["data_dir"]}/*.iso")
 
 
@@ -64,9 +65,11 @@ class DataHandlerBINCUE(DataHandler):
 
 
         wavs = glob.glob(f"{data_wav["data_dir"]}/*.wav")
+        wavs.sort()
         if len(wavs) > 0:
 
             for wav in wavs:
+                print(f"Working on: {wav}")
                 data_wav["data_files"]["WAV"].append(f"{wav.replace(data_wav["data_dir"]+"/","")}")
 
         isos = glob.glob(f"{data_wav["data_dir"]}/*.iso") + glob.glob(f"{data_iso["data_dir"]}/*.iso")
