@@ -3,6 +3,7 @@
 import subprocess
 import os
 import glob
+import sys
 import json
 
 from handler.data.data_handler import DataHandler, Data
@@ -76,12 +77,14 @@ class DataHandlerBINCUE(DataHandler):
         if len(isos) > 0:
 
             for iso in isos:
+
                 print(f"Working on: {iso}")
-                data_iso["data_files"]["ISO"].append(f"{iso.replace(data_iso["data_dir"]+"/","")}")
                 if "WAV" in iso:
                     os.rename(
                         iso,
                         f"{data_iso["data_dir"]}/{iso.replace(data_wav["data_dir"]+"/","")}")
+                    iso = f"{data_iso["data_dir"]}/{iso.replace(data_wav["data_dir"]+"/","")}"
+                data_iso["data_files"]["ISO"].append(f"{iso.replace(data_iso["data_dir"]+"/","")}")
 
         if len(wavs) == 0:
             data_wav = None
