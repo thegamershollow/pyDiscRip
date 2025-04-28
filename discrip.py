@@ -1,5 +1,10 @@
 #!/usr/bin/env python3
 
+# discrip.py
+# This is a CLI interface to the modules capable of ripping and converting data
+# from defined media types. It can take a list of media samples to rip in batch
+# and a configuration json to change some settings.
+
 # Python System 
 import argparse
 import csv
@@ -7,9 +12,10 @@ import json
 import sys
 from pprint import pprint
 
-# Hardware interfacing
+# External Modules
 import pyudev
 
+# Internal Modules
 from handler.media.manager import MediaHandlerManager
 from handler.data.manager import DataHandlerManager
 from handler.media.media_handler import Media
@@ -19,6 +25,9 @@ from handler.data.data_handler import Data
 def rip_list_read(filepath=None):
     """ Read a CSV with drive paths, BIN names, and full media_sample names
 
+    CSVs may optionally provide a `media_type` which will be used to bypass
+    automatic media type detection. If mixing known and unknown media types
+    you can set media_type to "auto" as well.
     """
 
     # Open CSV with media samples to rip
@@ -47,7 +56,7 @@ def config_read(filepath=None):
 
 
 def config_dump(filename):
-    """ Read a JSON with config parameters for media and data handlers
+    """ Save a JSON with all config parameter options for media and data handlers
 
     """
 
@@ -57,30 +66,27 @@ def config_dump(filename):
     options = media_manager.configDump() | data_manager.configDump()
 
     # Save config data to JSON
-
-
     with open(filename, 'w') as f:
         json.dump(options, f, indent=4)
 
 
 
 def rip_media_sample(media_sample,config_data):
-    """Determine media_sample type
+    """Determine media_sample type and start ripping
 
     """
 
     # Init media manager
     media_manager = MediaHandlerManager()
 
-    # Access the drive associated to the media to determine the type
+    # Check if a media type was provided
     if "media_type" not in media_sample or media_sample["media_type"] == "auto":
+        # Access the drive associated to the media to determine the type
         print("Finding media type")
-        media_sample["media_type"] = media_manager.guess_media_type(media_sample["Drive"])
-
+        media_sample["media_type"] = media_manager.guessMediaType(media_sample["Drive"])
 
     # Get a media handler for this type of media_sample
     media_handler = media_manager.findMediaType(media_sample)
-
 
     # If a handler exists attempt to rip
     if media_handler is not None:
@@ -115,8 +121,11 @@ def convert_data(media_sample,config_data):
 
     # Setup config
     data_processed=0
+    # Iterate over all data from media sample which can increase as data is processed
     while data_processed < len(media_sample["data"]):
+        # Update data count
         data_processed = len(media_sample["data"])
+        # Convert all data
         for data in media_sample["data"]:
             # Get a media handler for this type of media_sample
             data_handler = data_manager.findDataType(data)
@@ -133,6 +142,11 @@ def convert_data(media_sample,config_data):
 
 
 def main():
+    """ Execute as a CLI and process parameters to rip and convert
+
+    """
+
+    # Setup CLI arguments
     parser = argparse.ArgumentParser(
                     prog='pyDiscRip',
                     description='Media ripping manager program',
@@ -144,22 +158,29 @@ def main():
     parser.add_argument('-o', '--output', help="Directory to save data in")
     args = parser.parse_args()
 
+    # Dump config options and exit
     if args.configdump is not None:
         config_dump(args.configdump)
         sys.exit(0)
 
+    # If CSV is blank return only CSV header and exit
     if args.csv == "":
         print("Drive, Name, Description")
         sys.exit(0)
 
+    # Read media samples to rip from CSV file
     media_samples = rip_list_read(args.csv)
+    # Load optional config file
     if args.config is not None:
         config_data = config_read(args.config)
     else:
         config_data = {}
+    # Begin ripping all media samples provided
     rip_count = 1
     for media_sample in media_samples:
         rip_media_sample(media_sample,config_data)
+
+        # If there are more media samples to rip, wait while user changes samples
         if rip_count < len(media_samples):
             rip_count+=1
             input("Change media_samples and press Enter to continue...")

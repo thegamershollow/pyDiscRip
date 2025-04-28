@@ -1,5 +1,8 @@
 #!/usr/bin/env python3
 
+# Floppy ripping module for pyDiscRip. Uses greaseweazle hardware
+
+# Python System
 import os
 import subprocess
 import json
@@ -7,20 +10,29 @@ from pathlib import Path
 import importlib
 from pprint import pprint
 
+# External Modules
+# Directly imports from greaseweazle module in code
+
+# Internal Modules
 from handler.media.media_handler import MediaHandler, Media
 from handler.data.data_handler import Data
 
 
 class MediaHandlerFloppy(MediaHandler):
-    """API Base for signal emitters
+    """Handler for Floppy media types
 
-    Manages loading API keys, logging, and registering signal recievers
+    rips using greaseweazle floppy interface and directly accessing python code
     """
 
     def __init__(self):
-        """Init with file path"""
+        """Constructor to setup basic data and config defaults
+
+        """
+        # Call parent constructor
         super().__init__()
+        # Set media type to handle
         self.media_id=Media.Floppy
+        # Default config data
         self.config_data={
             "flux_output":"raw",
             "gw":{
@@ -33,37 +45,42 @@ class MediaHandlerFloppy(MediaHandler):
                 "reverse": None
                 }
         }
+        # Data types output
         self.data_outputs=[Data.Flux]
 
-    def ripToKryoFlux(self, media_sample):
 
-        data = {}
+    def ripToFlux(self, media_sample):
+        """Use gw python modules to rip floppy directly
+
+        """
+
+        # Data types to return to be processed after rip
+        datas=[]
 
         if self.config_data["flux_output"] == "raw":
             data = {
                 "data_id": Data.Flux,
                 "processed_by": [],
-                "data_dir": f"{self.project_dir}/{Data.Flux.value}",
+                "data_dir": self.ensureDir(f"{self.project_dir}/{Data.Flux.value}"),
                 "data_files": {
                     "flux": f"track00.0.raw"
                 }
             }
 
-        # Make data_dir if not there
-        if not os.path.exists(data["data_dir"]):
-            os.makedirs(data["data_dir"])
-
+        # Import greaseweazle read module to access hardware
         mod = importlib.import_module('greaseweazle.tools.read')
         main = mod.__dict__['main']
 
+        # gw modules individually parse arguments to control rip process. This
+        # builds fake argumets to pass to module
+        # For more information on gw parameters run `gw read --help`
         args=[]
-        args.append("doesn't matter?")
-        args.append("read")
+        args.append("pyDiscRip") # Not actually used but index position is needed
+        args.append("read") # Not actually used but index position is needed
         args.append("--drive")
         args.append(media_sample["Drive"])
 
-        pprint(self.config_data)
-        # Add config options
+        # Process all config options to build parameters for gw module
         if "revs" in self.config_data["gw"] and self.config_data["gw"]["revs"] is not None:
             args.append("--revs")
             args.append(str(self.config_data["gw"]["revs"]))
@@ -84,19 +101,35 @@ class MediaHandlerFloppy(MediaHandler):
         if "reverse" in self.config_data["gw"] and self.config_data["gw"]["reverse"] is not None:
             args.append("--reverse")
 
+        # Add the file output as final parameter
         args.append(f"{data["data_dir"]}/{data["data_files"]["flux"]}")
 
+        # Log all parameters to be passed to gw read
         self.log("floppy_gw_args",args,json_output=True)
 
+        # Run the gw read process using arguments
         res = main(args)
 
-    def rip(self, media_sample):
+        # Check rip result
+        if res == 0:
+            # Add generated data to output
+            datas.append(data)
 
-        print("Temporary hard coded 80-Track")
+        # Return all generated data
+        return datas
+
+
+    def rip(self, media_sample):
+        """Rip Floppy with greaseweazle hardware using gw software as python
+        modules
+
+        Only rips to flux, the convert step later can be used to decode flux
+
+        """
+
+        # Setup rip output path
         self.setProjectDir(media_sample["Name"])
 
-        self.ripToKryoFlux(media_sample)
-
+        # Rip and return data
         return None
-
 

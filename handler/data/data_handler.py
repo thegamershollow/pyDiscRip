@@ -1,13 +1,21 @@
 #!/usr/bin/env python3
 
+# Base data handler for pyDiscRip.
+
+# Python System
 import sys, os
 import json
 from enum import Enum
 from datetime import datetime
 
+# Internal Modules
 from handler.handler import Handler
 
+
 class Data(Enum):
+    """Data types currently supported
+
+    """
     BINCUE="BINCUE"
     MUSICBRAINZ="MUSICBRAINZ"
     WAV="WAV"
@@ -16,8 +24,9 @@ class Data(Enum):
     Flux="FLUX"
     Z_FILES="Z_FILES" # Special type for indeterminate files
 
+
 class DataHandler(Handler):
-    """Base class for Media Types to handle identification and ripping
+    """Base class for Data Types to handle identification and conversion
 
     Data dict structure example:
 {
@@ -34,12 +43,18 @@ class DataHandler(Handler):
     """
 
     def __init__(self):
-        """Init"""
+        """Constructor to setup basic data and config defaults
 
+        """
+        # Call parent constructor
         super().__init__()
+        # Set data type id for later use
         self.data_id=None
-        self.project_dir="."
+        # Set directory to work in
+        self.project_dir="./"
+        # Get current datetime
         self.project_timestamp=str(datetime.now().isoformat()).replace(":","-")
+        # Data types output for later use
         self.data_outputs=[]
 
 

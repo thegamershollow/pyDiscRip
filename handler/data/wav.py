@@ -1,67 +1,97 @@
 #!/usr/bin/env python3
 
+# WAV conversion module for pyDiscRip.
+
+# Python System
 import subprocess
 import os
 import glob
 import json
 
+# External Modules
 import ffmpeg
 
+# Internal Modules
 from handler.data.data_handler import DataHandler, Data
 
 
 class DataHandlerWAV(DataHandler):
-    """API Base for signal emitters
+    """Handler for WAV data types
 
-    Manages loading API keys, logging, and registering signal recievers
+    Converts files using ffmpeg
     """
 
     def __init__(self):
-        """Init with file path"""
+        """Constructor to setup basic data and config defaults
+
+        """
+        # Call parent constructor
         super().__init__()
+        # Set data type to handle
         self.data_id=Data.WAV
+        # Data types output
         self.data_outputs=[Data.FLAC]
 
-    def convertWAV(self,data,data_meta=None):
 
-        # Write data
+    def convertWAV(self,data,data_meta=None):
+        """Use ffmpeg to convert WAVs to FLAC
+
+        Optionally uses metadata to tag files
+
+        TODO - I don't think this can handle CDs that did not find metadata
+
+        """
+        # Track info from metadata
         tracks = None
+        # Metadata object for ffmpeg
         metadata = {}
+        # Data files to process
         data_files = {}
+        # Matching release for metadata
         release = {}
+
+        # Open metadata json
         with open(f"{data_meta["data_dir"]}/{data_meta["data_files"]["JSON"]}", encoding="utf-8") as f:
             json_data = json.load(f)
+
+            # Get discid for sample ripped
             discid = json_data["disc"]["id"]
+
+            # Iterate through all releases in metadata
             for medium in json_data["disc"]["release-list"][0]["medium-list"]:
                 for disc in medium["disc-list"]:
+                    # Find matching release
                     if disc["id"] == discid:
                         release = medium
+                        # break?
+
+            # Get track data for release
             tracks = release["track-list"]
 
+            # Build metadata for ffmpeg
             metadata = {
                 "metadata:g:1": f"artist={json_data["disc"]["release-list"][0]["artist-credit-phrase"]}",
                 "metadata:g:2": f"album={json_data["disc"]["release-list"][0]["title"]}",
                 "metadata:g:3": f"date={int(json_data["disc"]["release-list"][0]["date"][0:4])}"
             }
 
+            # Build data output for FLAC
             data_files = {
                 "data_id": Data.FLAC,
                 "processed_by": [],
-                "data_dir": f"{self.project_dir}/{Data.FLAC.value}/{self.cleanFilename(json_data["disc"]["release-list"][0]["artist-credit-phrase"])}/{json_data["disc"]["release-list"][0]["date"][0:4]} - {self.cleanFilename(json_data["disc"]["release-list"][0]["title"])}",
+                "data_dir": self.ensureDir(f"{self.project_dir}/{Data.FLAC.value}/{self.cleanFilename(json_data["disc"]["release-list"][0]["artist-credit-phrase"])}/{json_data["disc"]["release-list"][0]["date"][0:4]} - {self.cleanFilename(json_data["disc"]["release-list"][0]["title"])}"),
                 "data_files": {
                     "FLAC": []
                 }
             }
 
-        # Make data_dir if not there
-        if not os.path.exists(data_files["data_dir"]):
-            os.makedirs(data_files["data_dir"])
-
+        # Iterate over WAV files
         for i,v in enumerate(data["data_files"]["WAV"]):
             print(f"Working on: {data["data_files"]["WAV"][i]}: {self.cleanFilename(tracks[i]["recording"]["title"])}")
-
+            # Set track title in ffmpeg metadata
             metadata["metadata:g:0"] = f"title={tracks[i]["recording"]["title"]}"
 
+            # Run ffmpeg to conver WAV to FLAC
             (ffmpeg
                 .input(f"{data["data_dir"]}/{data["data_files"]["WAV"][i]}")
                 .output(f"{data_files["data_dir"]}/{(i+1):02} - {self.cleanFilename(tracks[i]["recording"]["title"])}.flac", **metadata)
@@ -69,33 +99,44 @@ class DataHandlerWAV(DataHandler):
                 .run(capture_stdout=True, capture_stderr=True)
             )
 
+        # Get FLAC files
         flacs = glob.glob(f"{data_files["data_dir"]}/*.flac")
+        # If FLACs were created add them to data output
         if len(flacs) > 0:
-
             for flac in flacs:
                 data_files["data_files"]["FLAC"].append(f"{flac.replace(data_files["data_dir"]+"/","")}")
         return data_files
 
-    def convert(self, media_sample):
 
+    def convert(self, media_sample):
+        """Take in WAV and convert to FLACs with taging if available
+
+        """
+
+        # Setup rip output path
         self.setProjectDir(media_sample["Name"])
 
-        # check if resulting ISO is UDF or ISO9660
+        # Go through all data in media sample
         for data in media_sample["data"]:
+            # Check handler can work on data
             if data["data_id"] == self.data_id:
+                # Check if handler has already worked on data
                 if self.data_id not in data["processed_by"]:
                     print("Convert WAV to FLAC")
+
+                    # Check for metadata
                     data_meta=None
                     for data_sup in media_sample["data"]:
                         if data_sup["data_id"] == Data.MUSICBRAINZ:
                             data_meta=data_sup
 
+                    # Convert data
                     data_output = self.convertWAV(data, data_meta)
 
-
-
                     if data_output is not None:
+                        # Mark data as processed
                         data["processed_by"].append(self.data_id)
                         media_sample["data"].append(data_output)
 
+        # Return media sample with new data
         return media_sample

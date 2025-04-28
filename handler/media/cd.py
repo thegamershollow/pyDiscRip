@@ -1,35 +1,53 @@
 #!/usr/bin/env python3
 
+# CD ripping module for pyDiscRip. Can be used to rip a CD and fetch metadata
+
+# Python System
 import os
 import subprocess
 import json
 from pathlib import Path
 
+# External Modules
 import libdiscid
 import musicbrainzngs
 
+# Internal Modules
 from handler.media.media_handler import MediaHandler, Media
 from handler.data.data_handler import Data
 
 
 class MediaHandlerCD(MediaHandler):
-    """API Base for signal emitters
+    """Handler for CD media types
 
-    Manages loading API keys, logging, and registering signal recievers
+    rips using a subprocess command to run `cdrdao` to create a BIN/CUE
     """
 
     def __init__(self):
-        """Init with file path"""
+        """Constructor to setup basic data and config defaults
+
+        """
+        # Call parent constructor
         super().__init__()
+        # Set media type to handle
         self.media_id=Media.CD
-        self.cd_sessions=0
-        self.cd_tracks=0
+        # Default config data
         self.config_data={
             "cdrdao_driver":"generic-mmc-raw:0x20000"
         }
+        # Data types output
         self.data_outputs=[Data.BINCUE,Data.MUSICBRAINZ]
+        # CD info to be collected
+        self.cd_sessions=0
+        self.cd_tracks=0
+
 
     def countSessions(self,media_sample):
+        """Use cdrdao to count the number of sessions on a CD
+
+        CDs may conntain multiple sessions which will each be ripped into
+        seperate BIN/CUE files.
+        """
 # Sample output
 # cdrdao disk-info --device  /dev/sr1
 # Cdrdao version 1.2.4 - (C) Andreas Mueller <andreas@daneb.de>
@@ -48,30 +66,39 @@ class MediaHandlerCD(MediaHandler):
 # Sessions             : 2
 # Last Track           : 23
 # Appendable           : no
+
+        # Build command
         cmd = f"cdrdao disk-info --device {media_sample["Drive"]}"
 
         try:
+            # Run command and store output
             result = subprocess.run([cmd], shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
 
         except subprocess.CalledProcessError as exc:
             print("Status : FAIL", exc.returncode, exc.output)
         else:
+            # Parse output to find session count
             self.log("cdrdao-disk-info",result.stdout.decode("utf-8"))
             self.cd_sessions=int(result.stdout.decode("utf-8").split("Sessions             : ")[1][:1])
             print(f"Sessions Found: {self.cd_sessions}")
 
 
     def ripBinCue(self, media_sample):
+        """Use cdrdao to rip all sessions on a CD and toc2cue to get cue file
 
-        print("Begin rip")
+        """
+
+        # Data types to return to be processed after rip
         datas=[]
+        # Start ripping all sessions
         sessions = 1
         while sessions <= self.cd_sessions:
             print(f"Rip session: {sessions}")
+            # Build data output
             data = {
                 "data_id": Data.BINCUE,
                 "processed_by": [],
-                "data_dir": f"{self.project_dir}/{Data.BINCUE.value}/{media_sample["Name"]}-S{sessions}",
+                "data_dir": self.ensureDir(f"{self.project_dir}/{Data.BINCUE.value}/{media_sample["Name"]}-S{sessions}"),
                 "data_files": {
                     "BIN": f"{media_sample["Name"]}-S{sessions}.bin",
                     "CUE": f"{media_sample["Name"]}-S{sessions}.cue",
@@ -79,17 +106,16 @@ class MediaHandlerCD(MediaHandler):
                 }
             }
 
-            # Make data_dir if not there
-            if not os.path.exists(data["data_dir"]):
-                os.makedirs(data["data_dir"])
-
             # Don't re-rip BIN/TOC
             if not os.path.exists(f"{data["data_dir"]}/{data["data_files"]["BIN"]}"):
                 # Build cdrdao command to read CD
                 cmd = f"cdrdao read-cd --read-raw --datafile \"{data["data_dir"]}/{data["data_files"]["BIN"]}\" --device \"{media_sample["Drive"]}\" --session \"{sessions}\"  --driver {self.config_data["cdrdao_driver"]} \"{data["data_dir"]}/{data["data_files"]["TOC"]}\""
 
-                self.log("cmd",cmd)
+                # Log cdrdao command
+                self.log("cdrdao_cmd",cmd)
+
                 try:
+                    # Run cdrdao CD rip
                     result = subprocess.run([cmd], shell=True)
 
                 except subprocess.CalledProcessError as exc:
@@ -102,54 +128,63 @@ class MediaHandlerCD(MediaHandler):
                 cmd = f"toc2cue \"{data["data_dir"]}/{data["data_files"]["TOC"]}\" \"{data["data_dir"]}/{data["data_files"]["CUE"]}\""
 
                 try:
+                    # Run toc2cue
                     result = subprocess.run([cmd], shell=True)
 
                 except subprocess.CalledProcessError as exc:
                     print("Status : FAIL", exc.returncode, exc.output)
 
+            # Continue to next session
             sessions += 1
+            # Add generated data to output
             datas.append(data)
 
+        # Return all generated data
         return datas
 
+
     def fetchMetadata(self,media_sample):
+        """Use musicbrainzngs to fetch Audio CD metadata
+
+        """
         data = {
             "data_id": Data.MUSICBRAINZ,
             "processed_by": [],
-            "data_dir": f"{self.project_dir}/{Data.MUSICBRAINZ.value}",
+            "data_dir": self.ensureDir(f"{self.project_dir}/{Data.MUSICBRAINZ.value}"),
             "data_files": {
                 "JSON": f"{media_sample["Name"]}-musicbrainz.json"
             }
         }
 
-        # Make data_dir if not there
-        if not os.path.exists(data["data_dir"]):
-            os.makedirs(data["data_dir"])
-
+        # Don't re-download data if exists
         if not os.path.exists(f"{data["data_dir"]}/{data["data_files"]["JSON"]}"):
             # https://python-discid.readthedocs.io/en/latest/usage/#fetching-metadata
             musicbrainzngs.set_useragent("AkBKukU: pyDiscRip", "0.1", "akbkuku@akbkuku.com")
 
             try:
+                # Get calculated discid for CD
+                # NOTE - This process is not failureproof and can result in discid collisions
                 disc = libdiscid.read(device=media_sample["Drive"])
                 self.log("disc.id",disc.id)
             except libdiscid.exceptions.DiscError:
                 print("no actual audio tracks on disc: CDROM or DVD?")
                 return None
             try:
+                # Fetch metadata using discid
                 result = musicbrainzngs.get_releases_by_discid(disc.id,
                                                             includes=["artists", "recordings"])
             except musicbrainzngs.ResponseError:
                 print("disc not found or bad response")
             else:
+                # Received metadata
                 if result.get("disc"):
-                    #self.log("mb-disc",result,json_output=True)
+                    # Print some data to CLI for user to see
                     print("artist:\t%s" %
                         result["disc"]["release-list"][0]["artist-credit-phrase"])
                     print(result["disc"]["release-list"][0])
                     print("title:\t%s" % result["disc"]["release-list"][0]["title"])
 
-                    # Write data
+                    # Write data to json
                     with open(f"{data["data_dir"]}/{data["data_files"]["JSON"]}", 'w', encoding="utf-8") as output:
                         output.write(json.dumps(result, indent=4))
 
@@ -164,22 +199,37 @@ class MediaHandlerCD(MediaHandler):
                 return data
         return data
 
+
     def rip(self, media_sample):
-        print("Ripping as CD")
+        """Rip CD with cdrdao and fetch metadata with musicbrainzngs
+
+        Will automatically generate cue for bin using toc2cue
+
+        """
+
+        # Data types to return
         datas=[]
+
+        # Setup rip output path
         self.setProjectDir(media_sample["Name"])
+        # Determine number of seesions to rip
         self.countSessions(media_sample)
+        # Get metadata for audio CD
         data_output = self.fetchMetadata(media_sample)
 
+        # Add metadata if was found
         if data_output is not None:
                 datas.append(data_output)
 
+        # Rip all sessions on CD
         data_outputs = self.ripBinCue(media_sample)
 
+        # Add all session rips
         if data_outputs is not None:
             for data in data_outputs:
                 datas.append(data)
 
+        # Return ripped data
         return datas
 
 

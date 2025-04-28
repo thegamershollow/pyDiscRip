@@ -1,41 +1,69 @@
 #!/usr/bin/env python3
 
+# Base handler for pyDiscRip.
+
+# Python System
 import sys, os,re
 import json
 from enum import Enum
 from datetime import datetime
 
+# External Modules
 import unidecode
 
+
 class Handler(object):
-    """Base class for Media and Data Types to handle identification data
-    manipulation
+    """Base handler for media and data samples
 
 
     """
-
     def __init__(self):
-        """Init"""
+        """Constructor to setup basic data and config defaults
 
-        self.media_id=None
+        """
+        self.media_id=None # TODO - Genericize media and data IDs
+        # Set directory to work in
         self.project_dir="./"
+        # Get current datetime
         self.project_timestamp=str(datetime.now().isoformat()).replace(":","-")
+        # Data types output for later use
         self.data_outputs=[]
+        # Default config data
         self.config_data=None
 
+
     def cleanFilename(self, filename_raw):
-        return re.sub("[\\/\\\\\\&:\\\"<>\?\*|]","-", unidecode.unidecode(filename_raw))
+        """Replace characters that are not available for filenames in some filesystems
+
+        """
+        return re.sub("[\\/\\\\\\&:\\\"<>\*|]","-", unidecode.unidecode(filename_raw))
 
     def setProjectDir(self,project_dir="./"):
+        """Update project dir path
+
+        """
         self.project_dir=project_dir
 
-    def log(self,action_name,text,json_output=False):
-        """logging output for data"""
-        log_path=f"{self.project_dir}/log"
+    def ensureDir(self,path):
+        """Ensured that a path exists by attempting to create it or throwing an error
 
-        # Make log dir if not there
-        if not os.path.exists(log_path):
-            os.makedirs(log_path)
+        """
+        try:
+            if not os.path.exists(path):
+                os.makedirs(path)
+        except Exception as e:
+            print(f"Error making directory: {path}")
+            sys.exit(1)
+        return path
+
+    def log(self,action_name,text,json_output=False):
+        """Log data from processes
+
+        Supports JSON as an output format
+
+        """
+        # Set filepath for log
+        log_path=self.ensureDir(f"{self.project_dir}/log")
 
         # Build filename
         if json_output:
@@ -53,12 +81,15 @@ class Handler(object):
         return
 
     def config(self, config_data):
-        """Receive configutation data for the rip"""
+        """Set configuration data for handler by matching ID
 
+        """
+
+        # Check for config data for handler
         if self.media_id in config_data:
-            print(config_data[self.media_id])
+            # Iterate over all top level config values
             for key, value in config_data[self.media_id].items():
-                print(f"{key}: {value}")
+                # Set all config values
                 self.config_data[key] = value
 
 
