@@ -3,7 +3,10 @@
 # Media types
 from handler.media.cd import MediaHandlerCD
 from handler.media.dvd import MediaHandlerDVD
+from handler.media.media_handler import Media
 
+# Hardware interfacing
+import pyudev
 
 class MediaHandlerManager(object):
 
@@ -21,3 +24,27 @@ class MediaHandlerManager(object):
         return None
 
 
+    def guess_media_type(self,drivepath=None):
+        """ Guess media type in drive which will determine how it is ripped
+
+        """
+
+        # Init udev interface to access drive
+        context = pyudev.Context()
+
+        # Get info from device
+        # NOTE: Returns as list but we are accessing a specific device
+        for dev in context.list_devices(sys_name=drivepath.replace("/dev/","")):
+            #print(json.dumps(dict(dev.properties),indent=4))
+            # Determine media type by ID
+            if "ID_CDROM_MEDIA_CD" in dev:
+                media_type=Media.CD
+            elif "ID_CDROM_MEDIA_DVD" in dev:
+                media_type=Media.DVD
+                print("Is DVD")
+            elif "ID_CDROM_MEDIA_BD" in dev:
+                media_type="BD"
+            else:
+                media_type=None
+
+        return media_type

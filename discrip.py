@@ -5,6 +5,7 @@ import argparse
 import csv
 import json
 import sys
+from pprint import pprint
 
 # Hardware interfacing
 import pyudev
@@ -13,31 +14,6 @@ from handler.media.manager import MediaHandlerManager
 from handler.data.manager import DataHandlerManager
 from handler.media.media_handler import Media
 from handler.data.data_handler import Data
-
-def drive_media_type(drivepath=None):
-    """ Check media type in drive which will determine how it is ripped
-
-    """
-
-    # Init udev interface to access drive
-    context = pyudev.Context()
-
-    # Get info from device
-    # NOTE: Returns as list but we are accessing a specific device
-    for dev in context.list_devices(sys_name=drivepath.replace("/dev/","")):
-        #print(json.dumps(dict(dev.properties),indent=4))
-        # Determine media type by ID
-        if "ID_CDROM_MEDIA_CD" in dev:
-            media_type=Media.CD
-        elif "ID_CDROM_MEDIA_DVD" in dev:
-            media_type=Media.DVD
-            print("Is DVD")
-        elif "ID_CDROM_MEDIA_BD" in dev:
-            media_type="BD"
-        else:
-            media_type=None
-
-    return media_type
 
 
 def rip_list_read(filepath=None):
@@ -75,11 +51,14 @@ def rip_media_sample(media_sample,config_data):
 
     """
 
-    # Access the drive associated to the media to determine the type
-    media_sample["media_type"] = drive_media_type(media_sample["Drive"])
-
     # Init media manager
     media_manager = MediaHandlerManager()
+
+    # Access the drive associated to the media to determine the type
+    if "media_type" not in media_sample or media_sample["media_type"] == "auto":
+        print("Finding media type")
+        media_sample["media_type"] = media_manager.guess_media_type(media_sample["Drive"])
+
 
     # Get a media handler for this type of media_sample
     media_handler = media_manager.findMediaType(media_sample)
@@ -103,8 +82,10 @@ def rip_media_sample(media_sample,config_data):
     else:
         if media_sample["media_type"] is None:
             print("Error accessing drive or media_sample")
+            pprint(media_sample)
         else:
             print(f"Media type \"{media_sample["media_type"].value}\" not supported")
+
 
 def convert_data(media_sample,config_data):
     """ Converts all possible data types until media sample if fully processed.
