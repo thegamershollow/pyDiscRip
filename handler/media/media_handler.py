@@ -10,6 +10,7 @@ from handler.handler import Handler
 class Media(str,Enum):
     CD="CD"
     DVD="DVD"
+    Floppy="Floppy"
 
 class MediaHandler(Handler):
     """Base class for Media Types to handle identification and ripping

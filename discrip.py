@@ -84,7 +84,7 @@ def rip_media_sample(media_sample,config_data):
             print("Error accessing drive or media_sample")
             pprint(media_sample)
         else:
-            print(f"Media type \"{media_sample["media_type"].value}\" not supported")
+            print(f"Media type \"{media_sample["media_type"]}\" not supported")
 
 
 def convert_data(media_sample,config_data):

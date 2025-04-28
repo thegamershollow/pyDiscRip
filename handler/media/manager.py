@@ -3,6 +3,7 @@
 # Media types
 from handler.media.cd import MediaHandlerCD
 from handler.media.dvd import MediaHandlerDVD
+from handler.media.floppy import MediaHandlerFloppy
 from handler.media.media_handler import Media
 
 # Hardware interfacing
@@ -15,6 +16,7 @@ class MediaHandlerManager(object):
         self.media_types={}
         self.media_types["CD"] = MediaHandlerCD()
         self.media_types["DVD"] = MediaHandlerDVD()
+        self.media_types["Floppy"] = MediaHandlerFloppy()
 
     def findMediaType(self,media_sample):
         for media_id, media_type in self.media_types.items():
