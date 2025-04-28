@@ -25,7 +25,7 @@ class DataHandlerISO9660(DataHandler):
         # Call parent constructor
         super().__init__()
         # Set data type to handle
-        self.data_id=Data.ISO9660
+        self.type_id=Data.ISO9660
         # Data types output
         self.data_outputs=[Data.Z_FILES]
 
@@ -40,7 +40,7 @@ class DataHandlerISO9660(DataHandler):
 
             # Build data output files
             data_files = {
-                "data_id": Data.Z_FILES,
+                "type_id": Data.Z_FILES,
                 "processed_by": [],
                 "data_dir": self.ensureDir(f"{data["data_dir"]}/{iso.replace(".iso","")}"),
                 "data_files": {
@@ -77,16 +77,16 @@ class DataHandlerISO9660(DataHandler):
         # Go through all data in media sample
         for data in media_sample["data"]:
             # Check handler can work on data
-            if data["data_id"] == self.data_id:
+            if data["type_id"] == self.type_id:
                 # Check if handler has already worked on data
-                if self.data_id not in data["processed_by"]:
+                if self.type_id not in data["processed_by"]:
                     # Convert data
                     print("Extract files from ISO9660 image")
                     data_output = self.convertISO9660(data)
 
                     if data_output is not None:
                         # Mark data as processed
-                        data["processed_by"].append(self.data_id)
+                        data["processed_by"].append(self.type_id)
                         # Add new data to media sample
                         media_sample["data"].append(data_output)
 

@@ -26,7 +26,7 @@ class MediaHandlerDVD(MediaHandler):
         # Call parent constructor
         super().__init__()
         # Set media type to handle
-        self.media_id=Media.DVD
+        self.type_id=Media.DVD
         # Data types output
         self.data_outputs=[Data.ISO9660]
         # DVD info to be collected
@@ -39,7 +39,7 @@ class MediaHandlerDVD(MediaHandler):
         """
         # TODO - Data is not always ISO9660, support for UDF is needed still
         data = {
-            "data_id": Data.ISO9660,
+            "type_id": Data.ISO9660,
             "processed_by": [],
             "data_dir":  self.ensureDir(f"{self.project_dir}/{Data.ISO9660.value}/{media_sample["Name"]}"),
             "data_files": {

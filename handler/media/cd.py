@@ -30,7 +30,7 @@ class MediaHandlerCD(MediaHandler):
         # Call parent constructor
         super().__init__()
         # Set media type to handle
-        self.media_id=Media.CD
+        self.type_id=Media.CD
         # Default config data
         self.config_data={
             "cdrdao_driver":"generic-mmc-raw:0x20000"
@@ -96,7 +96,7 @@ class MediaHandlerCD(MediaHandler):
             print(f"Rip session: {sessions}")
             # Build data output
             data = {
-                "data_id": Data.BINCUE,
+                "type_id": Data.BINCUE,
                 "processed_by": [],
                 "data_dir": self.ensureDir(f"{self.project_dir}/{Data.BINCUE.value}/{media_sample["Name"]}-S{sessions}"),
                 "data_files": {
@@ -148,7 +148,7 @@ class MediaHandlerCD(MediaHandler):
 
         """
         data = {
-            "data_id": Data.MUSICBRAINZ,
+            "type_id": Data.MUSICBRAINZ,
             "processed_by": [],
             "data_dir": self.ensureDir(f"{self.project_dir}/{Data.MUSICBRAINZ.value}"),
             "data_files": {

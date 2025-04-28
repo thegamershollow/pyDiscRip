@@ -21,7 +21,7 @@ class Handler(object):
         """Constructor to setup basic data and config defaults
 
         """
-        self.media_id=None # TODO - Genericize media and data IDs
+        self.type_id=None # TODO - Genericize media and data IDs
         # Set directory to work in
         self.project_dir="./"
         # Get current datetime
@@ -84,11 +84,11 @@ class Handler(object):
         """Set configuration data for handler by matching ID
 
         """
-
+        print(f"Configuring:{self.type_id}")
         # Check for config data for handler
-        if self.media_id in config_data:
+        if self.type_id.value in config_data:
             # Iterate over all top level config values
-            for key, value in config_data[self.media_id].items():
+            for key, value in config_data[self.type_id.value].items():
                 # Set all config values
                 self.config_data[key] = value
 

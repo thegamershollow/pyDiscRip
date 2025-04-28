@@ -33,7 +33,7 @@ class MediaHandler(Handler):
         # Call parent constructor
         super().__init__()
         # Set media type id for later use
-        self.media_id=None
+        self.type_id=None
         # Set directory to work in
         self.project_dir="./"
         # Get current datetime
@@ -44,5 +44,5 @@ class MediaHandler(Handler):
 
     def mediaMatch(self, media_sample=None):
         """Check if the media sample should be handled by this type"""
-        return media_sample["media_type"] == self.media_id
+        return media_sample["media_type"] == self.type_id
 

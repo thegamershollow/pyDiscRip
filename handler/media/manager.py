@@ -39,7 +39,7 @@ class MediaHandlerManager(object):
         """
 
         # Iterate through all handlers
-        for media_id, media_type in self.media_types.items():
+        for type_id, media_type in self.media_types.items():
             # If handler can proccess media return it
             if media_type.mediaMatch(media_sample):
                 return media_type
@@ -54,9 +54,9 @@ class MediaHandlerManager(object):
         """
         config_options={}
         # Iterate through all handlers
-        for media_id, media_type in self.media_types.items():
+        for type_id, media_type in self.media_types.items():
             # Add all config options for handler
-            config_options[media_id]=media_type.configOptions()
+            config_options[type_id]=media_type.configOptions()
 
         return config_options
 

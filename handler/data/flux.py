@@ -14,11 +14,10 @@ from pprint import pprint
 # Directly imports from greaseweazle module in code
 
 # Internal Modules
-from handler.media.media_handler import MediaHandler, Media
-from handler.data.data_handler import Data
+from handler.data.data_handler import DataHandler, Data
 
 
-class MediaHandlerFloppy(MediaHandler):
+class DataHandlerFLUX(DataHandler):
     """Handler for Floppy media types
 
     rips using greaseweazle floppy interface and directly accessing python code
@@ -31,44 +30,43 @@ class MediaHandlerFloppy(MediaHandler):
         # Call parent constructor
         super().__init__()
         # Set media type to handle
-        self.type_id=Media.Floppy
+        self.type_id=Data.FLUX
         # Default config data
         self.config_data={
-            "flux_output":"raw",
+            "convert_output":"img",
             "gw":{
-                "revs": None,
                 "tracks": None,
                 "hard-sectors": None,
-                "seek-retries": None,
                 "pll": None,
-                "densel": None,
-                "reverse": None
+                "reverse": None,
+                "diskdefs": None,
+                "format": "ibm.1440"
                 }
         }
         # Data types output
-        self.data_outputs=[Data.FLUX]
+        self.data_outputs=[Data.FAT12]
 
 
-    def ripToFlux(self, media_sample):
-        """Use gw python modules to rip floppy directly
+    def convertFLUX(self, data_in):
+        """Use gw python modules to convert FLUX to BINARY
 
         """
 
         # Data types to return to be processed after rip
         datas=[]
 
-        if self.config_data["flux_output"] == "raw":
+        if self.config_data["convert_output"] == "img":
             data = {
-                "type_id": Data.FLUX,
+                "type_id": Data.BINARY,
                 "processed_by": [],
-                "data_dir": self.ensureDir(f"{self.project_dir}/{Data.FLUX.value}"),
+                "data_dir": self.ensureDir(f"{self.project_dir}/{Data.BINARY.value}"),
                 "data_files": {
-                    "flux": f"track00.0.raw"
+                    "BINARY": f"{self.project_dir}.img" # Reusing project dir for name
                 }
             }
 
         # Import greaseweazle read module to access hardware
-        mod = importlib.import_module('greaseweazle.tools.read')
+        mod = importlib.import_module('greaseweazle.tools.convert')
         main = mod.__dict__['main']
 
         # gw modules individually parse arguments to control rip process. This
@@ -76,14 +74,15 @@ class MediaHandlerFloppy(MediaHandler):
         # For more information on gw parameters run `gw read --help`
         args=[]
         args.append("pyDiscRip") # Not actually used but index position is needed
-        args.append("read") # Not actually used but index position is needed
-        args.append("--drive")
-        args.append(media_sample["Drive"])
+        args.append("convert") # Not actually used but index position is needed
 
         # Process all config options to build parameters for gw module
-        if "revs" in self.config_data["gw"] and self.config_data["gw"]["revs"] is not None:
-            args.append("--revs")
-            args.append(str(self.config_data["gw"]["revs"]))
+        if "diskdefs" in self.config_data["gw"] and self.config_data["gw"]["diskdefs"] is not None:
+            args.append("--diskdefs")
+            args.append(str(self.config_data["gw"]["diskdefs"]))
+        if "format" in self.config_data["gw"] and self.config_data["gw"]["format"] is not None:
+            args.append("--format")
+            args.append(str(self.config_data["gw"]["format"]))
         if "tracks" in self.config_data["gw"] and self.config_data["gw"]["tracks"] is not None:
             args.append("--tracks")
             args.append(str(self.config_data["gw"]["tracks"]))
@@ -93,22 +92,22 @@ class MediaHandlerFloppy(MediaHandler):
         if "pll" in self.config_data["gw"] and self.config_data["gw"]["pll"] is not None:
             args.append("--pll")
             args.append(self.config_data["gw"]["pll"])
-        if "densel" in self.config_data["gw"] and self.config_data["gw"]["densel"] is not None:
-            args.append("--densel")
-            args.append(self.config_data["gw"]["densel"])
         if "hard-sectors" in self.config_data["gw"] and self.config_data["gw"]["hard-sectors"] is not None:
             args.append("--hard-sectors")
         if "reverse" in self.config_data["gw"] and self.config_data["gw"]["reverse"] is not None:
             args.append("--reverse")
 
+        # Add the file input as parameter
+        args.append(f"{data_in["data_dir"]}/{data_in["data_files"]["flux"]}")
+
         # Add the file output as final parameter
-        args.append(f"{data["data_dir"]}/{data["data_files"]["flux"]}")
+        args.append(f"{data["data_dir"]}/{data["data_files"]["BINARY"]}")
 
         # Log all parameters to be passed to gw read
         self.log("floppy_gw_args",args,json_output=True)
 
         # Don't re-rip Floppy
-        if not os.path.exists(f"{data["data_dir"]}/{data["data_files"]["flux"]}"):
+        if not os.path.exists(f"{data["data_dir"]}/{data["data_files"]["BINARY"]}"):
             # Run the gw read process using arguments
             res = main(args)
         else:
@@ -123,17 +122,33 @@ class MediaHandlerFloppy(MediaHandler):
 
 
 
-    def rip(self, media_sample):
-        """Rip Floppy with greaseweazle hardware using gw software as python
-        modules
-
-        Only rips to flux, the convert step later can be used to decode flux
+    def convert(self, media_sample):
+        """Take in FLUX and convert to decoded BINARY output based on config
 
         """
 
         # Setup rip output path
         self.setProjectDir(media_sample["Name"])
 
-        # Rip and return data
-        return [self.ripToFlux(media_sample)]
+        # Go through all data in media sample
+        for data in media_sample["data"]:
+            # Check handler can work on data
+            if data["type_id"] == self.type_id:
+                # Check if handler has already worked on data
+                if self.type_id not in data["processed_by"]:
+                    # Convert data
+                    print("Converting FLUX to BINARY")
+                    data_outputs = [self.convertFLUX(data)]
+
+                    if data_outputs is not None:
+                        # Mark data as processed
+                        data["processed_by"].append(self.type_id)
+                        # Add new data to media sample
+                        for data_new in data_outputs:
+                            if data_new is not None:
+                                media_sample["data"].append(data_new)
+
+        # Return media sample with new data
+        return media_sample
+
 

@@ -37,7 +37,7 @@ class DataHandlerManager(object):
         """
 
         # Iterate through all handlers
-        for data_id, data_handler in self.data_types.items():
+        for type_id, data_handler in self.data_types.items():
             if data_handler.dataMatch(data):
                 return data_handler
 
@@ -50,9 +50,9 @@ class DataHandlerManager(object):
         """
         config_options={}
         # Iterate through all handlers
-        for data_id, data_handler in self.data_types.items():
+        for type_id, data_handler in self.data_types.items():
             # Add all config options for handler
-            config_options[data_id]=data_handler.configOptions()
+            config_options[type_id]=data_handler.configOptions()
 
         return config_options
 

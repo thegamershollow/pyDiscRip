@@ -26,7 +26,7 @@ class DataHandlerBINCUE(DataHandler):
         # Call parent constructor
         super().__init__()
         # Set data type to handle
-        self.data_id=Data.BINCUE
+        self.type_id=Data.BINCUE
         # Data types output
         self.data_outputs=[Data.WAV,Data.ISO9660]
 
@@ -37,7 +37,7 @@ class DataHandlerBINCUE(DataHandler):
         """
         # Build data output for WAV
         data_wav = {
-            "data_id": Data.WAV,
+            "type_id": Data.WAV,
             "processed_by": [],
             "data_dir": self.ensureDir(f"{self.project_dir}/{Data.WAV.value}/{data_in["data_files"]["BIN"].replace(".bin","")}"),
             "data_files": {
@@ -47,7 +47,7 @@ class DataHandlerBINCUE(DataHandler):
 
         # Build data output ISO
         data_iso = {
-            "data_id": Data.ISO9660,
+            "type_id": Data.ISO9660,
             "processed_by": [],
             "data_dir": self.ensureDir(f"{self.project_dir}/{Data.ISO9660.value}/{data_in["data_files"]["BIN"].replace(".bin","")}"),
             "data_files": {
@@ -123,16 +123,16 @@ class DataHandlerBINCUE(DataHandler):
         # Go through all data in media sample
         for data in media_sample["data"]:
             # Check handler can work on data
-            if data["data_id"] == self.data_id:
+            if data["type_id"] == self.type_id:
                 # Check if handler has already worked on data
-                if self.data_id not in data["processed_by"]:
+                if self.type_id not in data["processed_by"]:
                     # Convert data
                     print("Converting BINCUE to FLAC and ISO9660")
                     data_outputs = self.convertBINCUE(data)
 
                     if data_outputs is not None:
                         # Mark data as processed
-                        data["processed_by"].append(self.data_id)
+                        data["processed_by"].append(self.type_id)
                         # Add new data to media sample
                         for data_new in data_outputs:
                             if data_new is not None:

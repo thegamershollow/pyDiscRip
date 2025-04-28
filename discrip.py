@@ -138,7 +138,7 @@ def convert_data(media_sample,config_data):
                 media_sample = data_handler.convert(media_sample)
 
             else:
-                print(f"No data handler found for [{data["data_id"].value}]")
+                print(f"No data handler found for [{data["type_id"].value}]")
 
 
 def main():

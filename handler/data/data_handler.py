@@ -32,7 +32,7 @@ class DataHandler(Handler):
 
     Data dict structure example:
 {
-    data_id: Data.BINCUE,
+    type_id: Data.BINCUE,
     data_dir: "some-folder",
     data_processed: False,
     data_files: {
@@ -51,7 +51,7 @@ class DataHandler(Handler):
         # Call parent constructor
         super().__init__()
         # Set data type id for later use
-        self.data_id=None
+        self.type_id=None
         # Set directory to work in
         self.project_dir="./"
         # Get current datetime
@@ -62,5 +62,5 @@ class DataHandler(Handler):
 
     def dataMatch(self, data_sample=None):
         """Check if the data sample should be handled by this type"""
-        return data_sample["data_id"] == self.data_id
+        return data_sample["type_id"] == self.type_id
 
