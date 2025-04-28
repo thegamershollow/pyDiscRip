@@ -107,16 +107,20 @@ class MediaHandlerFloppy(MediaHandler):
         # Log all parameters to be passed to gw read
         self.log("floppy_gw_args",args,json_output=True)
 
-        # Run the gw read process using arguments
-        res = main(args)
+        # Don't re-rip Floppy
+        if not os.path.exists(f"{data["data_dir"]}/{data["data_files"]["flux"]}"):
+            # Run the gw read process using arguments
+            res = main(args)
+        else:
+            res = 0
 
         # Check rip result
         if res == 0:
-            # Add generated data to output
-            datas.append(data)
+            # Return all generated data
+            return data
+        else:
+            return None
 
-        # Return all generated data
-        return datas
 
 
     def rip(self, media_sample):
@@ -131,5 +135,5 @@ class MediaHandlerFloppy(MediaHandler):
         self.setProjectDir(media_sample["Name"])
 
         # Rip and return data
-        return None
+        return [self.ripToFlux(media_sample)]
 
