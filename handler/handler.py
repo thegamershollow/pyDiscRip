@@ -84,7 +84,6 @@ class Handler(object):
         """Set configuration data for handler by matching ID
 
         """
-        print(f"Configuring:{self.type_id}")
         # Check for config data for handler
         if self.type_id.value in config_data:
             # Iterate over all top level config values

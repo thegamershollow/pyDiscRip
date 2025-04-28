@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 
-# Floppy ripping module for pyDiscRip. Uses greaseweazle hardware
+# Flux conversion module for pyDiscRip. Uses greaseweazle software
 
 # Python System
 import os
@@ -18,9 +18,9 @@ from handler.data.data_handler import DataHandler, Data
 
 
 class DataHandlerFLUX(DataHandler):
-    """Handler for Floppy media types
+    """Handler for FLUX data types
 
-    rips using greaseweazle floppy interface and directly accessing python code
+    converts using greaseweazle software by directly accessing python code
     """
 
     def __init__(self):
@@ -29,7 +29,7 @@ class DataHandlerFLUX(DataHandler):
         """
         # Call parent constructor
         super().__init__()
-        # Set media type to handle
+        # Set data type to handle
         self.type_id=Data.FLUX
         # Default config data
         self.config_data={
@@ -44,16 +44,13 @@ class DataHandlerFLUX(DataHandler):
                 }
         }
         # Data types output
-        self.data_outputs=[Data.FAT12]
+        self.data_outputs=[Data.BINARY]
 
 
     def convertFLUX(self, data_in):
         """Use gw python modules to convert FLUX to BINARY
 
         """
-
-        # Data types to return to be processed after rip
-        datas=[]
 
         if self.config_data["convert_output"] == "img":
             data = {
@@ -106,19 +103,13 @@ class DataHandlerFLUX(DataHandler):
         # Log all parameters to be passed to gw read
         self.log("floppy_gw_args",args,json_output=True)
 
-        # Don't re-rip Floppy
+        # Don't re-convert flux
         if not os.path.exists(f"{data["data_dir"]}/{data["data_files"]["BINARY"]}"):
             # Run the gw read process using arguments
             res = main(args)
-        else:
-            res = 0
 
-        # Check rip result
-        if res == 0:
-            # Return all generated data
-            return data
-        else:
-            return None
+        # Return all generated data
+        return data
 
 
 
@@ -138,17 +129,16 @@ class DataHandlerFLUX(DataHandler):
                 if self.type_id not in data["processed_by"]:
                     # Convert data
                     print("Converting FLUX to BINARY")
-                    data_outputs = [self.convertFLUX(data)]
+                    data_output = self.convertFLUX(data)
 
-                    if data_outputs is not None:
+                    if data_output is not None:
                         # Mark data as processed
                         data["processed_by"].append(self.type_id)
                         # Add new data to media sample
-                        for data_new in data_outputs:
-                            if data_new is not None:
-                                media_sample["data"].append(data_new)
+                        media_sample["data"].append(data_output)
 
         # Return media sample with new data
+        print("returning data")
         return media_sample
 
 
