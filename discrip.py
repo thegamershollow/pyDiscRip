@@ -46,6 +46,24 @@ def config_read(filepath=None):
     return config_data
 
 
+def config_dump(filename):
+    """ Read a JSON with config parameters for media and data handlers
+
+    """
+
+    media_manager = MediaHandlerManager()
+    data_manager = DataHandlerManager()
+
+    options = media_manager.configDump() | data_manager.configDump()
+
+    # Save config data to JSON
+
+
+    with open(filename, 'w') as f:
+        json.dump(options, f, indent=4)
+
+
+
 def rip_media_sample(media_sample,config_data):
     """Determine media_sample type
 
@@ -117,12 +135,18 @@ def convert_data(media_sample,config_data):
 def main():
     parser = argparse.ArgumentParser(
                     prog='pyDiscRip',
-                    description='Disc ripping manager program',
+                    description='Media ripping manager program',
                     epilog='By Shelby Jueden')
     parser.add_argument('-c', '--csv', help="CSV file in `Drive,Name,Description` format", default=None)
-    parser.add_argument('-f', '--config', help="Config file for ripping",default=None)
+    parser.add_argument('-f', '--config', help="Config file for ripping", default=None)
+    parser.add_argument('-d', '--configdump', help="Dump all config options. Optional filename to output to.",
+                        nargs='?', default=None, const='config_options.json')
     parser.add_argument('-o', '--output', help="Directory to save data in")
     args = parser.parse_args()
+
+    if args.configdump is not None:
+        config_dump(args.configdump)
+        sys.exit(0)
 
     if args.csv == "":
         print("Drive, Name, Description")

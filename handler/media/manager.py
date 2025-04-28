@@ -25,6 +25,13 @@ class MediaHandlerManager(object):
 
         return None
 
+    def configDump(self):
+        config_options={}
+        for media_id, media_type in self.media_types.items():
+            config_options[media_id]=media_type.configOptions()
+
+        return config_options
+
 
     def guess_media_type(self,drivepath=None):
         """ Guess media type in drive which will determine how it is ripped

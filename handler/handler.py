@@ -62,6 +62,12 @@ class Handler(object):
                 self.config_data[key] = value
 
 
+    def configOptions(self):
+        """Return all configutation options"""
+
+        return self.config_data
+
+
 
 
 

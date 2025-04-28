@@ -24,4 +24,10 @@ class DataHandlerManager(object):
 
         return None
 
+    def configDump(self):
+        config_options={}
+        for data_id, data_handler in self.data_types.items():
+            config_options[data_id]=data_handler.configOptions()
+
+        return config_options
 
