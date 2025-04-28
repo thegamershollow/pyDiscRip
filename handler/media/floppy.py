@@ -46,7 +46,7 @@ class MediaHandlerFloppy(MediaHandler):
                 }
         }
         # Data types output
-        self.data_outputs=[Data.Flux]
+        self.data_outputs=[Data.FLUX]
 
 
     def ripToFlux(self, media_sample):
@@ -59,9 +59,9 @@ class MediaHandlerFloppy(MediaHandler):
 
         if self.config_data["flux_output"] == "raw":
             data = {
-                "data_id": Data.Flux,
+                "data_id": Data.FLUX,
                 "processed_by": [],
-                "data_dir": self.ensureDir(f"{self.project_dir}/{Data.Flux.value}"),
+                "data_dir": self.ensureDir(f"{self.project_dir}/{Data.FLUX.value}"),
                 "data_files": {
                     "flux": f"track00.0.raw"
                 }

@@ -21,7 +21,9 @@ class Data(Enum):
     WAV="WAV"
     FLAC="FLAC"
     ISO9660="ISO9660"
-    Flux="FLUX"
+    FLUX="FLUX"
+    FAT12="FAT12"
+    BINARY="BINARY" # Will want a subtype associated in the data_sample
     Z_FILES="Z_FILES" # Special type for indeterminate files
 
 

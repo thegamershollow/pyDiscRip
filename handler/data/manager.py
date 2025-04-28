@@ -7,6 +7,7 @@ from handler.data.data_handler import Data
 from handler.data.bincue import DataHandlerBINCUE
 from handler.data.iso9660 import DataHandlerISO9660
 from handler.data.wav import DataHandlerWAV
+from handler.data.flux import DataHandlerFLUX
 
 
 class DataHandlerManager(object):
@@ -27,6 +28,7 @@ class DataHandlerManager(object):
         self.data_types["BINCUE"] = DataHandlerBINCUE()
         self.data_types["ISO9660"] = DataHandlerISO9660()
         self.data_types["WAV"] = DataHandlerWAV()
+        self.data_types["FLUX"] = DataHandlerFLUX()
 
 
     def findDataType(self,data):
