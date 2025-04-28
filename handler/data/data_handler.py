@@ -13,7 +13,7 @@ class Data(Enum):
     WAV="WAV"
     FLAC="FLAC"
     ISO9660="ISO9660"
-    KryoFlux="KryoFlux"
+    Flux="FLUX"
     Z_FILES="Z_FILES" # Special type for indeterminate files
 
 class DataHandler(Handler):

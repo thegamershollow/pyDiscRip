@@ -23,7 +23,7 @@ class MediaHandlerFloppy(MediaHandler):
         self.config_data={
             "flux_output":"raw"
         }
-        self.data_outputs=[Data.KryoFlux]
+        self.data_outputs=[Data.Flux]
 
     def ripToKryoFlux(self, media_sample):
 
@@ -31,9 +31,9 @@ class MediaHandlerFloppy(MediaHandler):
 
         if self.config_data["flux_output"] == "raw":
             data = {
-                "data_id": Data.KryoFlux,
+                "data_id": Data.Flux,
                 "processed_by": [],
-                "data_dir": f"{self.project_dir}/{Data.KryoFlux.value}",
+                "data_dir": f"{self.project_dir}/{Data.Flux.value}",
                 "data_files": {
                     "flux": f"track00.0.raw"
                 }
