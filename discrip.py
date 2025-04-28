@@ -96,7 +96,6 @@ def convert_data(media_sample,config_data):
     data_manager = DataHandlerManager()
 
     # Setup config
-
     data_processed=0
     while data_processed < len(media_sample["data"]):
         data_processed = len(media_sample["data"])
