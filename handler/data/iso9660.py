@@ -3,7 +3,6 @@
 # ISO9660 conversion module for pyDiscRip.
 
 # Python System
-import subprocess
 import os
 import glob
 import json
@@ -53,14 +52,10 @@ class DataHandlerISO9660(DataHandler):
             # Build 7z command to extract files
             cmd = f"7z -y x {data["data_dir"]}/{iso} -o{data_files["data_dir"]}"
 
-            try:
-                # Run 7z command
-                result = subprocess.run([cmd], shell=True)
-                # Returns data if there was no error
-                return data_files
+            # Run command
+            self.osRun(cmd)
 
-            except subprocess.CalledProcessError as exc:
-                print("Status : FAIL", exc.returncode, exc.output)
+            return data_files
 
         # Only returned if an error happens
         return None

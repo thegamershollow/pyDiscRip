@@ -3,7 +3,6 @@
 # BINCUE conversion module for pyDiscRip.
 
 # Python System
-import subprocess
 import os
 import glob
 import sys
@@ -64,12 +63,8 @@ class DataHandlerBINCUE(DataHandler):
             # Build bchunk command to generate CUE
             cmd = f"bchunk -w {data_in["data_dir"]}/{data_in["data_files"]["BIN"]} {data_in["data_dir"]}/{data_in["data_files"]["CUE"]} {data_wav["data_dir"]}/track"
 
-            try:
-                # Run bchunk command
-                result = subprocess.run([cmd], shell=True)
-
-            except subprocess.CalledProcessError as exc:
-                print("Status : FAIL", exc.returncode, exc.output)
+            # Run command
+            self.osRun(cmd)
 
 
         # Get files in ouput directory

@@ -4,7 +4,6 @@
 
 # Python System
 import os
-import subprocess
 import json
 from pathlib import Path
 
@@ -67,20 +66,13 @@ class MediaHandlerCD(MediaHandler):
 # Last Track           : 23
 # Appendable           : no
 
-        # Build command
-        cmd = f"cdrdao disk-info --device {media_sample["Drive"]}"
+        # Run command
+        result =  self.osRun(f"cdrdao disk-info --device {media_sample["Drive"]}")
 
-        try:
-            # Run command and store output
-            result = subprocess.run([cmd], shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-
-        except subprocess.CalledProcessError as exc:
-            print("Status : FAIL", exc.returncode, exc.output)
-        else:
-            # Parse output to find session count
-            self.log("cdrdao-disk-info",result.stdout.decode("utf-8"))
-            self.cd_sessions=int(result.stdout.decode("utf-8").split("Sessions             : ")[1][:1])
-            print(f"Sessions Found: {self.cd_sessions}")
+        # Parse output to find session count
+        self.log("cdrdao-disk-info",result.stdout.decode("utf-8"))
+        self.cd_sessions=int(result.stdout.decode("utf-8").split("Sessions             : ")[1][:1])
+        print(f"Sessions Found: {self.cd_sessions}")
 
 
     def ripBinCue(self, media_sample):
@@ -114,12 +106,8 @@ class MediaHandlerCD(MediaHandler):
                 # Log cdrdao command
                 self.log("cdrdao_cmd",cmd)
 
-                try:
-                    # Run cdrdao CD rip
-                    result = subprocess.run([cmd], shell=True)
-
-                except subprocess.CalledProcessError as exc:
-                    print("Status : FAIL", exc.returncode, exc.output)
+                # Run command
+                self.osRun(cmd)
 
 
             # Don't re-convert CUE
@@ -127,12 +115,10 @@ class MediaHandlerCD(MediaHandler):
                 # Build toc2cue command to generate CUE
                 cmd = f"toc2cue \"{data["data_dir"]}/{data["data_files"]["TOC"]}\" \"{data["data_dir"]}/{data["data_files"]["CUE"]}\""
 
-                try:
-                    # Run toc2cue
-                    result = subprocess.run([cmd], shell=True)
-
-                except subprocess.CalledProcessError as exc:
-                    print("Status : FAIL", exc.returncode, exc.output)
+                # Run command
+                result = self.osRun(cmd)
+                self.log("cdrdao_stdout",str(result.stdout))
+                self.log("cdrdao_stderr",str(result.stderr))
 
             # Continue to next session
             sessions += 1
@@ -178,12 +164,6 @@ class MediaHandlerCD(MediaHandler):
             else:
                 # Received metadata
                 if result.get("disc"):
-                    # Print some data to CLI for user to see
-                    print("artist:\t%s" %
-                        result["disc"]["release-list"][0]["artist-credit-phrase"])
-                    print(result["disc"]["release-list"][0])
-                    print("title:\t%s" % result["disc"]["release-list"][0]["title"])
-
                     # Write data to json
                     with open(f"{data["data_dir"]}/{data["data_files"]["JSON"]}", 'w', encoding="utf-8") as output:
                         output.write(json.dumps(result, indent=4))

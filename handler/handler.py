@@ -7,6 +7,7 @@ import sys, os,re
 import json
 from enum import Enum
 from datetime import datetime
+import subprocess
 
 # External Modules
 import unidecode
@@ -97,7 +98,16 @@ class Handler(object):
 
         return self.config_data
 
+    def osRun(self, cmd):
+        """Runs a command at the OS level and returns stdout and stderr"""
+        try:
+            # Run command and store output
+            result = subprocess.run([cmd], shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
 
+            return result
+
+        except subprocess.CalledProcessError as exc:
+            print("Status : FAIL", exc.returncode, exc.output)
 
 
 

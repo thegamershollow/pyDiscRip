@@ -4,7 +4,6 @@
 
 # Python System
 import os
-import subprocess
 import json
 from pathlib import Path
 
@@ -55,14 +54,10 @@ class MediaHandlerDVD(MediaHandler):
             cmd2 = f"ddrescue -b 2048 -d -r 3 -v \"{media_sample["Drive"]}\" \"{data["data_dir"]}/{data["data_files"]["ISO"][0]}\" \"{data["data_dir"]}/mapfile\"  | tee -a ../$logs/dvd-ddrescue.log"
             cmd3 = f"ddrescue -b 2048 -d -R -r 3 -v \"{media_sample["Drive"]}\" \"{data["data_dir"]}/{data["data_files"]["ISO"][0]}\" \"{data["data_dir"]}/mapfile\"  | tee -a ../$logs/dvd-ddrescue.log"
 
-            try:
-                # Run all ddrescue passes
-                result = subprocess.run([cmd1], shell=True)
-                result = subprocess.run([cmd2], shell=True)
-                result = subprocess.run([cmd3], shell=True)
-
-            except subprocess.CalledProcessError as exc:
-                print("Status : FAIL", exc.returncode, exc.output)
+            # Run command
+            self.osRun(cmd1)
+            self.osRun(cmd2)
+            self.osRun(cmd3)
 
         # Return all generated data
         return data
