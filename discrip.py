@@ -180,9 +180,14 @@ def main():
         config_dump(args.configdump)
         sys.exit(0)
 
-    # If CSV is blank return only CSV header and exit
+    # If CSV is none exit
     if args.csv == None:
         parser.print_help()
+        sys.exit(0)
+
+    # If CSV is blank return only CSV header and exit
+    if args.csv == "":
+        print("Media_Type,Drive,Name,Description")
         sys.exit(0)
 
     # Read media samples to rip from CSV file
