@@ -46,6 +46,15 @@ def config_read(filepath=None):
     """ Read a JSON with config parameters for media and data handlers
 
     """
+    # Veryfiy config file exists
+    if not os.path.exists(filepath):
+        config_local = os.path.realpath(__file__).replace(os.path.basename(__file__),"")+"config/"+filepath
+        # Check for config file next to script
+        if not os.path.exists(config_local):
+            print(f"Config file \"{filepath}\" not found.")
+            sys.exit(1)
+        else:
+            filepath = config_local
 
     # Open JSON to read config data
     config_data={}
