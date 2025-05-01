@@ -40,7 +40,8 @@ def rip_list_read(filepath=None):
             reader.fieldnames[index]=name.lower()
 
         for row in reader:
-            row["media_type"] = row["media_type"].upper()
+            if "media_type" in row:
+                row["media_type"] = row["media_type"].upper()
             media_samples.append(row)
 
     # Return a dict of media_sample information to rip
