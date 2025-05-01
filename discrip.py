@@ -10,6 +10,7 @@ import argparse
 import csv
 import json
 import sys
+import os
 from pprint import pprint
 
 # External Modules
@@ -148,7 +149,7 @@ def main():
 
     # Setup CLI arguments
     parser = argparse.ArgumentParser(
-                    prog='pyDiscRip',
+                    prog="pyDiscRip",
                     description='Media ripping manager program',
                     epilog='By Shelby Jueden')
     parser.add_argument('-c', '--csv', help="CSV file in `Drive,Name,Description` format", default=None)
@@ -164,8 +165,8 @@ def main():
         sys.exit(0)
 
     # If CSV is blank return only CSV header and exit
-    if args.csv == "":
-        print("Drive, Name, Description")
+    if args.csv == None:
+        parser.print_help()
         sys.exit(0)
 
     # Read media samples to rip from CSV file
