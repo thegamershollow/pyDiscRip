@@ -35,7 +35,12 @@ def rip_list_read(filepath=None):
     media_samples=[]
     with open(filepath, newline='') as csvfile:
         reader = csv.DictReader(csvfile, skipinitialspace=True)
+        # Make all CSV headers lowercase
+        for index, name in enumerate(reader.fieldnames):
+            reader.fieldnames[index]=name.lower()
+
         for row in reader:
+            row["media_type"] = row["media_type"].upper()
             media_samples.append(row)
 
     # Return a dict of media_sample information to rip
@@ -93,7 +98,7 @@ def rip_media_sample(media_sample,config_data):
     if "media_type" not in media_sample or media_sample["media_type"] == "auto":
         # Access the drive associated to the media to determine the type
         print("Finding media type")
-        media_sample["media_type"] = media_manager.guessMediaType(media_sample["Drive"])
+        media_sample["media_type"] = media_manager.guessMediaType(media_sample["drive"])
 
     # Get a media handler for this type of media_sample
     media_handler = media_manager.findMediaType(media_sample)
@@ -137,6 +142,7 @@ def convert_data(media_sample,config_data):
         data_processed = len(media_sample["data"])
         # Convert all data
         for data in media_sample["data"]:
+            pprint(media_sample)
             # Get a media handler for this type of media_sample
             data_handler = data_manager.findDataType(data)
 
@@ -146,6 +152,7 @@ def convert_data(media_sample,config_data):
                 data_handler.config(config_data)
                 # Pass entire media sample to converter to support conversion using multiple data sources at once
                 media_sample = data_handler.convert(media_sample)
+                pprint(media_sample)
 
             else:
                 print(f"No data handler found for [{data["type_id"].value}]")

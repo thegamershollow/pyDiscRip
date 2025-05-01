@@ -18,7 +18,7 @@ class Media(str,Enum):
     """
     CD="CD"
     DVD="DVD"
-    Floppy="Floppy"
+    FLOPPY="FLOPPY"
 
 
 class MediaHandler(Handler):

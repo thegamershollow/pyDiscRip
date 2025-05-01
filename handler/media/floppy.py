@@ -30,7 +30,7 @@ class MediaHandlerFloppy(MediaHandler):
         # Call parent constructor
         super().__init__()
         # Set media type to handle
-        self.type_id=Media.Floppy
+        self.type_id=Media.FLOPPY
         # Default config data
         self.config_data={
             "flux_output":"raw",
@@ -77,7 +77,7 @@ class MediaHandlerFloppy(MediaHandler):
         args.append("pyDiscRip") # Not actually used but index position is needed
         args.append("read") # Not actually used but index position is needed
         args.append("--drive")
-        args.append(media_sample["Drive"])
+        args.append(media_sample["drive"])
 
         # Process all config options to build parameters for gw module
         if "revs" in self.config_data["gw"] and self.config_data["gw"]["revs"] is not None:
@@ -109,16 +109,10 @@ class MediaHandlerFloppy(MediaHandler):
         # Don't re-rip Floppy
         if not os.path.exists(f"{data["data_dir"]}/{data["data_files"]["flux"]}"):
             # Run the gw read process using arguments
-            res = main(args)
-        else:
-            res = 0
+            main(args)
 
-        # Check rip result
-        if res == 0:
-            # Return all generated data
-            return data
-        else:
-            return None
+        # Return all generated data
+        return data
 
 
 
@@ -131,7 +125,7 @@ class MediaHandlerFloppy(MediaHandler):
         """
 
         # Setup rip output path
-        self.setProjectDir(media_sample["Name"])
+        self.setProjectDir(media_sample["name"])
 
         # Rip and return data
         return [self.ripToFlux(media_sample)]

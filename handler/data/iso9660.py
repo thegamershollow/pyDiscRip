@@ -67,7 +67,7 @@ class DataHandlerISO9660(DataHandler):
         """
 
         # Setup rip output path
-        self.setProjectDir(media_sample["Name"])
+        self.setProjectDir(media_sample["name"])
 
         # Go through all data in media sample
         for data in media_sample["data"]:

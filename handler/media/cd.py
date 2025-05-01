@@ -67,7 +67,7 @@ class MediaHandlerCD(MediaHandler):
 # Appendable           : no
 
         # Run command
-        result =  self.osRun(f"cdrdao disk-info --device {media_sample["Drive"]}")
+        result =  self.osRun(f"cdrdao disk-info --device {media_sample["drive"]}")
 
         # Parse output to find session count
         self.log("cdrdao-disk-info",result.stdout.decode("utf-8"))
@@ -90,18 +90,18 @@ class MediaHandlerCD(MediaHandler):
             data = {
                 "type_id": Data.BINCUE,
                 "processed_by": [],
-                "data_dir": self.ensureDir(f"{self.project_dir}/{Data.BINCUE.value}/{media_sample["Name"]}-S{sessions}"),
+                "data_dir": self.ensureDir(f"{self.project_dir}/{Data.BINCUE.value}/{media_sample["name"]}-S{sessions}"),
                 "data_files": {
-                    "BIN": f"{media_sample["Name"]}-S{sessions}.bin",
-                    "CUE": f"{media_sample["Name"]}-S{sessions}.cue",
-                    "TOC": f"{media_sample["Name"]}-S{sessions}.toc"
+                    "BIN": f"{media_sample["name"]}-S{sessions}.bin",
+                    "CUE": f"{media_sample["name"]}-S{sessions}.cue",
+                    "TOC": f"{media_sample["name"]}-S{sessions}.toc"
                 }
             }
 
             # Don't re-rip BIN/TOC
             if not os.path.exists(f"{data["data_dir"]}/{data["data_files"]["BIN"]}"):
                 # Build cdrdao command to read CD
-                cmd = f"cdrdao read-cd --read-raw --datafile \"{data["data_dir"]}/{data["data_files"]["BIN"]}\" --device \"{media_sample["Drive"]}\" --session \"{sessions}\"  --driver {self.config_data["cdrdao_driver"]} \"{data["data_dir"]}/{data["data_files"]["TOC"]}\""
+                cmd = f"cdrdao read-cd --read-raw --datafile \"{data["data_dir"]}/{data["data_files"]["BIN"]}\" --device \"{media_sample["drive"]}\" --session \"{sessions}\"  --driver {self.config_data["cdrdao_driver"]} \"{data["data_dir"]}/{data["data_files"]["TOC"]}\""
 
                 # Log cdrdao command
                 self.log("cdrdao_cmd",cmd)
@@ -138,7 +138,7 @@ class MediaHandlerCD(MediaHandler):
             "processed_by": [],
             "data_dir": self.ensureDir(f"{self.project_dir}/{Data.MUSICBRAINZ.value}"),
             "data_files": {
-                "JSON": f"{media_sample["Name"]}-musicbrainz.json"
+                "JSON": f"{media_sample["name"]}-musicbrainz.json"
             }
         }
 
@@ -150,7 +150,7 @@ class MediaHandlerCD(MediaHandler):
             try:
                 # Get calculated discid for CD
                 # NOTE - This process is not failureproof and can result in discid collisions
-                disc = libdiscid.read(device=media_sample["Drive"])
+                disc = libdiscid.read(device=media_sample["drive"])
                 self.log("disc.id",disc.id)
             except libdiscid.exceptions.DiscError:
                 print("no actual audio tracks on disc: CDROM or DVD?")
@@ -191,7 +191,7 @@ class MediaHandlerCD(MediaHandler):
         datas=[]
 
         # Setup rip output path
-        self.setProjectDir(media_sample["Name"])
+        self.setProjectDir(media_sample["name"])
         # Determine number of seesions to rip
         self.countSessions(media_sample)
         # Get metadata for audio CD

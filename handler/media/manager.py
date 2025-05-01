@@ -30,7 +30,7 @@ class MediaHandlerManager(object):
         self.media_types={}
         self.media_types["CD"] = MediaHandlerCD()
         self.media_types["DVD"] = MediaHandlerDVD()
-        self.media_types["Floppy"] = MediaHandlerFloppy()
+        self.media_types["FLOPPY"] = MediaHandlerFloppy()
 
 
     def findMediaType(self,media_sample):

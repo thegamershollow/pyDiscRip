@@ -40,9 +40,9 @@ class MediaHandlerDVD(MediaHandler):
         data = {
             "type_id": Data.ISO9660,
             "processed_by": [],
-            "data_dir":  self.ensureDir(f"{self.project_dir}/{Data.ISO9660.value}/{media_sample["Name"]}"),
+            "data_dir":  self.ensureDir(f"{self.project_dir}/{Data.ISO9660.value}/{media_sample["name"]}"),
             "data_files": {
-                "ISO": [f"{media_sample["Name"]}.iso"]
+                "ISO": [f"{media_sample["name"]}.iso"]
             }
         }
 
@@ -50,9 +50,9 @@ class MediaHandlerDVD(MediaHandler):
         if not os.path.exists(f"{data["data_dir"]}/{data["data_files"]["ISO"][0]}"):
 
             # ddrescue is a multi step process that is run three times
-            cmd1 = f"ddrescue -b 2048 -n -v \"{media_sample["Drive"]}\" \"{data["data_dir"]}/{data["data_files"]["ISO"][0]}\" \"{data["data_dir"]}/mapfile\"  | tee -a ../$logs/dvd-ddrescue.log"
-            cmd2 = f"ddrescue -b 2048 -d -r 3 -v \"{media_sample["Drive"]}\" \"{data["data_dir"]}/{data["data_files"]["ISO"][0]}\" \"{data["data_dir"]}/mapfile\"  | tee -a ../$logs/dvd-ddrescue.log"
-            cmd3 = f"ddrescue -b 2048 -d -R -r 3 -v \"{media_sample["Drive"]}\" \"{data["data_dir"]}/{data["data_files"]["ISO"][0]}\" \"{data["data_dir"]}/mapfile\"  | tee -a ../$logs/dvd-ddrescue.log"
+            cmd1 = f"ddrescue -b 2048 -n -v \"{media_sample["drive"]}\" \"{data["data_dir"]}/{data["data_files"]["ISO"][0]}\" \"{data["data_dir"]}/mapfile\"  | tee -a ../$logs/dvd-ddrescue.log"
+            cmd2 = f"ddrescue -b 2048 -d -r 3 -v \"{media_sample["drive"]}\" \"{data["data_dir"]}/{data["data_files"]["ISO"][0]}\" \"{data["data_dir"]}/mapfile\"  | tee -a ../$logs/dvd-ddrescue.log"
+            cmd3 = f"ddrescue -b 2048 -d -R -r 3 -v \"{media_sample["drive"]}\" \"{data["data_dir"]}/{data["data_files"]["ISO"][0]}\" \"{data["data_dir"]}/mapfile\"  | tee -a ../$logs/dvd-ddrescue.log"
 
             # Run command
             self.osRun(cmd1)
@@ -70,7 +70,7 @@ class MediaHandlerDVD(MediaHandler):
         print("Ripping as DVD")
         print("WARNING: This software does not yet distinguish between ISO9660 and UDF filesystems")
         # Setup rip output path
-        self.setProjectDir(media_sample["Name"])
+        self.setProjectDir(media_sample["name"])
 
         # Rip and return data
         return [self.ripDVD(media_sample)]
