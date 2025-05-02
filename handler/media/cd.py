@@ -12,8 +12,7 @@ import libdiscid
 import musicbrainzngs
 
 # Internal Modules
-from handler.media.media_handler import MediaHandler, Media
-from handler.data.data_handler import Data
+from handler.media.media_handler import MediaHandler
 
 
 class MediaHandlerCD(MediaHandler):
@@ -29,13 +28,13 @@ class MediaHandlerCD(MediaHandler):
         # Call parent constructor
         super().__init__()
         # Set media type to handle
-        self.type_id=Media.CD
+        self.type_id="CD"
         # Default config data
         self.config_data={
             "cdrdao_driver":"generic-mmc-raw:0x20000"
         }
         # Data types output
-        self.data_outputs=[Data.BINCUE,Data.MUSICBRAINZ]
+        self.data_outputs=["BINCUE","MUSICBRAINZ"]
         # CD info to be collected
         self.cd_sessions=0
         self.cd_tracks=0
@@ -88,9 +87,9 @@ class MediaHandlerCD(MediaHandler):
             print(f"Rip session: {sessions}")
             # Build data output
             data = {
-                "type_id": Data.BINCUE,
+                "type_id": "BINCUE",
                 "processed_by": [],
-                "data_dir": self.ensureDir(f"{self.project_dir}/{Data.BINCUE.value}/{media_sample["name"]}-S{sessions}"),
+                "data_dir": self.ensureDir(f"{self.project_dir}/BINCUE/{media_sample["name"]}-S{sessions}"),
                 "data_files": {
                     "BIN": f"{media_sample["name"]}-S{sessions}.bin",
                     "CUE": f"{media_sample["name"]}-S{sessions}.cue",
@@ -134,9 +133,9 @@ class MediaHandlerCD(MediaHandler):
 
         """
         data = {
-            "type_id": Data.MUSICBRAINZ,
+            "type_id": "MUSICBRAINZ",
             "processed_by": [],
-            "data_dir": self.ensureDir(f"{self.project_dir}/{Data.MUSICBRAINZ.value}"),
+            "data_dir": self.ensureDir(f"{self.project_dir}/MUSICBRAINZ"),
             "data_files": {
                 "JSON": f"{media_sample["name"]}-musicbrainz.json"
             }

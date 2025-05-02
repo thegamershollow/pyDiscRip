@@ -13,7 +13,7 @@ from pprint import pprint
 # Directly imports from greaseweazle module in code
 
 # Internal Modules
-from handler.data.data_handler import DataHandler, Data
+from handler.data.data_handler import DataHandler
 
 
 class DataHandlerFLUX(DataHandler):
@@ -29,7 +29,7 @@ class DataHandlerFLUX(DataHandler):
         # Call parent constructor
         super().__init__()
         # Set data type to handle
-        self.type_id=Data.FLUX
+        self.type_id="FLUX"
         # Default config data
         self.config_data={
             "convert_output":"img",
@@ -43,7 +43,7 @@ class DataHandlerFLUX(DataHandler):
                 }
         }
         # Data types output
-        self.data_outputs=[Data.BINARY]
+        self.data_outputs=["BINARY"]
 
 
     def convertFLUX(self, data_in):
@@ -53,9 +53,9 @@ class DataHandlerFLUX(DataHandler):
 
         if self.config_data["convert_output"] == "img":
             data = {
-                "type_id": Data.BINARY,
+                "type_id": "BINARY",
                 "processed_by": [],
-                "data_dir": self.ensureDir(f"{self.project_dir}/{Data.BINARY.value}"),
+                "data_dir": self.ensureDir(f"{self.project_dir}/BINARY"),
                 "data_files": {
                     "BINARY": f"{self.project_dir}.img" # Reusing project dir for name
                 }

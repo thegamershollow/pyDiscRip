@@ -86,9 +86,9 @@ class Handler(object):
 
         """
         # Check for config data for handler
-        if self.type_id.value in config_data:
+        if self.type_id in config_data:
             # Iterate over all top level config values
-            for key, value in config_data[self.type_id.value].items():
+            for key, value in config_data[self.type_id].items():
                 # Set all config values
                 self.config_data[key] = value
 

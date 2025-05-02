@@ -11,7 +11,7 @@ import json
 import ffmpeg
 
 # Internal Modules
-from handler.data.data_handler import DataHandler, Data
+from handler.data.data_handler import DataHandler
 
 
 class DataHandlerWAV(DataHandler):
@@ -27,9 +27,9 @@ class DataHandlerWAV(DataHandler):
         # Call parent constructor
         super().__init__()
         # Set data type to handle
-        self.type_id=Data.WAV
+        self.type_id="WAV"
         # Data types output
-        self.data_outputs=[Data.FLAC]
+        self.data_outputs=["FLAC"]
 
 
     def convertWAV(self,data,data_meta=None):
@@ -76,9 +76,9 @@ class DataHandlerWAV(DataHandler):
 
             # Build data output for FLAC
             data_files = {
-                "type_id": Data.FLAC,
+                "type_id": "FLAC",
                 "processed_by": [],
-                "data_dir": self.ensureDir(f"{self.project_dir}/{Data.FLAC.value}/{self.cleanFilename(json_data["disc"]["release-list"][0]["artist-credit-phrase"])}/{json_data["disc"]["release-list"][0]["date"][0:4]} - {self.cleanFilename(json_data["disc"]["release-list"][0]["title"])}"),
+                "data_dir": self.ensureDir(f"{self.project_dir}/FLAC/{self.cleanFilename(json_data["disc"]["release-list"][0]["artist-credit-phrase"])}/{json_data["disc"]["release-list"][0]["date"][0:4]} - {self.cleanFilename(json_data["disc"]["release-list"][0]["title"])}"),
                 "data_files": {
                     "FLAC": []
                 }
@@ -126,7 +126,7 @@ class DataHandlerWAV(DataHandler):
                     # Check for metadata
                     data_meta=None
                     for data_sup in media_sample["data"]:
-                        if data_sup["type_id"] == Data.MUSICBRAINZ:
+                        if data_sup["type_id"] == "MUSICBRAINZ":
                             data_meta=data_sup
 
                     # Convert data

@@ -9,7 +9,6 @@ import pyudev
 from handler.media.cd import MediaHandlerCD
 from handler.media.dvd import MediaHandlerDVD
 from handler.media.floppy import MediaHandlerFloppy
-from handler.media.media_handler import Media
 
 
 class MediaHandlerManager(object):
@@ -76,9 +75,9 @@ class MediaHandlerManager(object):
             #print(json.dumps(dict(dev.properties),indent=4))
             # Determine media type by ID
             if "ID_CDROM_MEDIA_CD" in dev:
-                media_type=Media.CD
+                media_type="CD"
             elif "ID_CDROM_MEDIA_DVD" in dev:
-                media_type=Media.DVD
+                media_type="DVD"
                 print("Is DVD")
             elif "ID_CDROM_MEDIA_BD" in dev:
                 media_type="BD"

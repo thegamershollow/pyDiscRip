@@ -12,15 +12,6 @@ from datetime import datetime
 from handler.handler import Handler
 
 
-class Media(str,Enum):
-    """Media types currently supported
-
-    """
-    CD="CD"
-    DVD="DVD"
-    FLOPPY="FLOPPY"
-
-
 class MediaHandler(Handler):
     """Base class for Media Types to handle identification and ripping
 

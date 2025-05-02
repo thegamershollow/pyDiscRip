@@ -3,7 +3,6 @@
 # Data conversion manager for pyDiscRip. Can be used to rip a CD and fetch metadata
 
 # Internal Modules
-from handler.data.data_handler import Data
 from handler.data.bincue import DataHandlerBINCUE
 from handler.data.iso9660 import DataHandlerISO9660
 from handler.data.wav import DataHandlerWAV

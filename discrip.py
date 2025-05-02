@@ -19,8 +19,6 @@ import pyudev
 # Internal Modules
 from handler.media.manager import MediaHandlerManager
 from handler.data.manager import DataHandlerManager
-from handler.media.media_handler import Media
-from handler.data.data_handler import Data
 
 
 def rip_list_read(filepath=None):
@@ -156,7 +154,7 @@ def convert_data(media_sample,config_data):
                 pprint(media_sample)
 
             else:
-                print(f"No data handler found for [{data["type_id"].value}]")
+                print(f"No data handler found for [{data["type_id"]}]")
 
 
 def main():

@@ -8,7 +8,7 @@ import glob
 import json
 
 # Internal Modules
-from handler.data.data_handler import DataHandler, Data
+from handler.data.data_handler import DataHandler
 
 
 class DataHandlerISO9660(DataHandler):
@@ -24,9 +24,9 @@ class DataHandlerISO9660(DataHandler):
         # Call parent constructor
         super().__init__()
         # Set data type to handle
-        self.type_id=Data.ISO9660
+        self.type_id="ISO9660"
         # Data types output
-        self.data_outputs=[Data.Z_FILES]
+        self.data_outputs=["Z_FILES"]
 
 
     def convertISO9660(self,data):
@@ -39,7 +39,7 @@ class DataHandlerISO9660(DataHandler):
 
             # Build data output files
             data_files = {
-                "type_id": Data.Z_FILES,
+                "type_id": "Z_FILES",
                 "processed_by": [],
                 "data_dir": self.ensureDir(f"{data["data_dir"]}/{iso.replace(".iso","")}"),
                 "data_files": {

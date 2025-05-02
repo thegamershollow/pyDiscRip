@@ -9,7 +9,7 @@ import sys
 import json
 
 # Internal Modules
-from handler.data.data_handler import DataHandler, Data
+from handler.data.data_handler import DataHandler
 
 
 class DataHandlerBINCUE(DataHandler):
@@ -25,9 +25,9 @@ class DataHandlerBINCUE(DataHandler):
         # Call parent constructor
         super().__init__()
         # Set data type to handle
-        self.type_id=Data.BINCUE
+        self.type_id="BINCUE"
         # Data types output
-        self.data_outputs=[Data.WAV,Data.ISO9660]
+        self.data_outputs=["WAV","ISO9660"]
 
 
     def convertBINCUE(self,data_in):
@@ -36,9 +36,9 @@ class DataHandlerBINCUE(DataHandler):
         """
         # Build data output for WAV
         data_wav = {
-            "type_id": Data.WAV,
+            "type_id": "WAV",
             "processed_by": [],
-            "data_dir": self.ensureDir(f"{self.project_dir}/{Data.WAV.value}/{data_in["data_files"]["BIN"].replace(".bin","")}"),
+            "data_dir": self.ensureDir(f"{self.project_dir}/WAV/{data_in["data_files"]["BIN"].replace(".bin","")}"),
             "data_files": {
                 "WAV": []
             }
@@ -46,9 +46,9 @@ class DataHandlerBINCUE(DataHandler):
 
         # Build data output ISO
         data_iso = {
-            "type_id": Data.ISO9660,
+            "type_id": "ISO9660",
             "processed_by": [],
-            "data_dir": self.ensureDir(f"{self.project_dir}/{Data.ISO9660.value}/{data_in["data_files"]["BIN"].replace(".bin","")}"),
+            "data_dir": self.ensureDir(f"{self.project_dir}/ISO9660/{data_in["data_files"]["BIN"].replace(".bin","")}"),
             "data_files": {
                 "ISO": []
             }

@@ -8,8 +8,7 @@ import json
 from pathlib import Path
 
 # Internal Modules
-from handler.media.media_handler import MediaHandler, Media
-from handler.data.data_handler import Data
+from handler.media.media_handler import MediaHandler
 
 
 class MediaHandlerDVD(MediaHandler):
@@ -25,9 +24,9 @@ class MediaHandlerDVD(MediaHandler):
         # Call parent constructor
         super().__init__()
         # Set media type to handle
-        self.type_id=Media.DVD
+        self.type_id="DVD"
         # Data types output
-        self.data_outputs=[Data.ISO9660]
+        self.data_outputs=["ISO9660"]
         # DVD info to be collected
         self.dvd_partition_filesystem=""
 
@@ -38,9 +37,9 @@ class MediaHandlerDVD(MediaHandler):
         """
         # TODO - Data is not always ISO9660, support for UDF is needed still
         data = {
-            "type_id": Data.ISO9660,
+            "type_id": "ISO9660",
             "processed_by": [],
-            "data_dir":  self.ensureDir(f"{self.project_dir}/{Data.ISO9660.value}/{media_sample["name"]}"),
+            "data_dir":  self.ensureDir(f"{self.project_dir}/ISO9660/{media_sample["name"]}"),
             "data_files": {
                 "ISO": [f"{media_sample["name"]}.iso"]
             }

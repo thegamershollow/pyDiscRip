@@ -13,8 +13,7 @@ from pprint import pprint
 # Directly imports from greaseweazle module in code
 
 # Internal Modules
-from handler.media.media_handler import MediaHandler, Media
-from handler.data.data_handler import Data
+from handler.media.media_handler import MediaHandler
 
 
 class MediaHandlerFloppy(MediaHandler):
@@ -30,7 +29,7 @@ class MediaHandlerFloppy(MediaHandler):
         # Call parent constructor
         super().__init__()
         # Set media type to handle
-        self.type_id=Media.FLOPPY
+        self.type_id="FLOPPY"
         # Default config data
         self.config_data={
             "flux_output":"raw",
@@ -45,7 +44,7 @@ class MediaHandlerFloppy(MediaHandler):
                 }
         }
         # Data types output
-        self.data_outputs=[Data.FLUX]
+        self.data_outputs=["FLUX"]
 
 
     def ripToFlux(self, media_sample):
@@ -58,9 +57,9 @@ class MediaHandlerFloppy(MediaHandler):
 
         if self.config_data["flux_output"] == "raw":
             data = {
-                "type_id": Data.FLUX,
+                "type_id": "FLUX",
                 "processed_by": [],
-                "data_dir": self.ensureDir(f"{self.project_dir}/{Data.FLUX.value}"),
+                "data_dir": self.ensureDir(f"{self.project_dir}/FLUX"),
                 "data_files": {
                     "flux": f"track00.0.raw"
                 }

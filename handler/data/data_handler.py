@@ -12,21 +12,6 @@ from datetime import datetime
 from handler.handler import Handler
 
 
-class Data(Enum):
-    """Data types currently supported
-
-    """
-    BINCUE="BINCUE"
-    MUSICBRAINZ="MUSICBRAINZ"
-    WAV="WAV"
-    FLAC="FLAC"
-    ISO9660="ISO9660"
-    FLUX="FLUX"
-    FAT12="FAT12"
-    BINARY="BINARY" # Will want a subtype associated in the data_sample
-    Z_FILES="Z_FILES" # Special type for indeterminate files
-
-
 class DataHandler(Handler):
     """Base class for Data Types to handle identification and conversion
 
