@@ -44,10 +44,35 @@ The header `media_type` is not required for optical discs, but is requried for o
 
 A Json configuration file may be used to change some parameters of the rip such as the `cdrdao` driver or the format the Greaseweazle `convert` function will use to decode flux. You can have all possible configuration values dumped to a file with the `-d` parameter, a filename may be specified to put them into.
 
+### Virtal Data Formats
+Virtual data formats may be specified in config files. This allows you to add additional conversion steps only in json.
+
+Here is an example of a virtual format for extracting contents a binary file that contains a FAT12 filesystem using `mtools`:
+
+```
+"Virtual": {
+        "Data": [
+            {
+                "input_type_id":"BINARY",
+                "output_type_id":"Z_FILES",
+                "cmd":"mcopy -spi {input_file} ::*.* {data_dir}",
+                "data_output": {
+                    "type_id": "Z_FILES",
+                    "processed_by": [],
+                    "data_dir": "FILES",
+                    "data_files": {
+                        "Z_FILES": ""
+                    }
+                }
+            }
+        ]
+    }
+```
+
+The `{input_file}` and `{data_dir}` parts of the "cmd" get substituted before execution.
+
 ## Roadmap
 
-### Data: Virtal
-A "virtual" data format should be possible to define within a config file. This would allow using tools not supported by the software during data conversion steps. Virtual formats may be possible as well but would be more unpredictable.
 
 ### Format: CD
  - Pre-gap detection and ripping (would be audio only so can go direct to WAV)
