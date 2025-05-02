@@ -15,13 +15,13 @@
     "Virtual": {
         "Data": [
             {
-                "input_type_id":"FAT12",
+                "input_type_id":"BINARY",
                 "output_type_id":"Z_FILES",
                 "cmd":"mcopy -spi {input_file} ::*.* {data_dir}",
                 "data_output": {
                     "type_id": "Z_FILES",
                     "processed_by": [],
-                    "data_dir": "{project_dir}/FILES",
+                    "data_dir": "FILES",
                     "data_files": {
                         "Z_FILES": ""
                     }

@@ -38,6 +38,7 @@ def rip_list_read(filepath=None):
             reader.fieldnames[index]=name.lower()
 
         for row in reader:
+            # Convert media types to upper case if present
             if "media_type" in row:
                 row["media_type"] = row["media_type"].upper()
             media_samples.append(row)
@@ -133,6 +134,9 @@ def convert_data(media_sample,config_data):
     # Init media manager
     data_manager = DataHandlerManager()
 
+    # Create virtual data formats from config
+    data_manager.configVirtual(config_data)
+
     # Setup config
     data_processed=0
     # Iterate over all data from media sample which can increase as data is processed
@@ -141,7 +145,6 @@ def convert_data(media_sample,config_data):
         data_processed = len(media_sample["data"])
         # Convert all data
         for data in media_sample["data"]:
-            pprint(media_sample)
             # Get a media handler for this type of media_sample
             data_handler = data_manager.findDataType(data)
 
@@ -151,7 +154,6 @@ def convert_data(media_sample,config_data):
                 data_handler.config(config_data)
                 # Pass entire media sample to converter to support conversion using multiple data sources at once
                 media_sample = data_handler.convert(media_sample)
-                pprint(media_sample)
 
             else:
                 print(f"No data handler found for [{data["type_id"]}]")

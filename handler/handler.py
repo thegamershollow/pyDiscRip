@@ -32,6 +32,27 @@ class Handler(object):
         # Default config data
         self.config_data=None
 
+        # Virtual Handler Setup
+        self.virt_cmd=None
+        # Data format
+        self.data_output_format=None
+        # Temp Media Sample Holder
+        self.media_sample=None
+
+
+    def prepareVirtualFormat(self,setup):
+        """Setup handler for a virtual format
+
+        """
+        # Type to act on
+        self.type_id=setup["input_type_id"]
+        # Type to output
+        self.data_outputs=[setup["output_type_id"]]
+        # Command to run
+        self.virt_cmd=setup["cmd"]
+        # Data format
+        self.data_output_format=setup["data_output"]
+
 
     def cleanFilename(self, filename_raw):
         """Replace characters that are not available for filenames in some filesystems
@@ -98,6 +119,7 @@ class Handler(object):
 
         return self.config_data
 
+
     def osRun(self, cmd):
         """Runs a command at the OS level and returns stdout and stderr"""
         try:
@@ -109,6 +131,30 @@ class Handler(object):
         except subprocess.CalledProcessError as exc:
             print("Status : FAIL", exc.returncode, exc.output)
 
+
+    def convertData(self, data_in):
+        """Generic convert command that for use with virtual data formats"""
+
+        # Copy default format
+        data = self.data_output_format
+
+        # Create and set output dir
+        data["data_dir"]=self.ensureDir(self.project_dir+"/"+data["data_dir"])
+
+        # Format command
+        cmd = self.virt_cmd.format(
+            input_file=data_in["data_dir"]+"/"+data_in["data_files"]["BINARY"],
+            data_dir=data["data_dir"]
+            )
+
+        # log command
+        self.log(f"{self.type_id}_cmd",str(cmd))
+
+        # Run command
+        result = self.osRun(cmd)
+
+
+        return [data]
 
     def convert(self, media_sample):
         """Generic convert process for one data output
@@ -137,7 +183,6 @@ class Handler(object):
                                 media_sample["data"].append(data_new)
 
         # Return media sample with new data
-        print("returning data")
         return media_sample
 
 

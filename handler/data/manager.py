@@ -2,7 +2,10 @@
 
 # Data conversion manager for pyDiscRip. Can be used to rip a CD and fetch metadata
 
+from pprint import pprint
+
 # Internal Modules
+from handler.data.data_handler import DataHandler
 from handler.data.bincue import DataHandlerBINCUE
 from handler.data.iso9660 import DataHandlerISO9660
 from handler.data.wav import DataHandlerWAV
@@ -29,6 +32,16 @@ class DataHandlerManager(object):
         self.data_types["WAV"] = DataHandlerWAV()
         self.data_types["FLUX"] = DataHandlerFLUX()
 
+    def configVirtual(self,config):
+        """Configure a new handler to use as a virtual data format
+
+        """
+        if "Virtual" in config:
+            # Add all new virtual formats
+            for data in config["Virtual"]["Data"]:
+                # Create and configure new handler
+                self.data_types[data["input_type_id"]] = DataHandler()
+                self.data_types[data["input_type_id"]].prepareVirtualFormat(data)
 
     def findDataType(self,data):
         """Match data handler to type and return handler
