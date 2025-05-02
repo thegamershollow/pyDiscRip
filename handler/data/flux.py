@@ -46,7 +46,7 @@ class DataHandlerFLUX(DataHandler):
         self.data_outputs=["BINARY"]
 
 
-    def convertFLUX(self, data_in):
+    def convertData(self, data_in):
         """Use gw python modules to convert FLUX to BINARY
 
         """
@@ -108,36 +108,7 @@ class DataHandlerFLUX(DataHandler):
             res = main(args)
 
         # Return all generated data
-        return data
+        return [data]
 
-
-
-    def convert(self, media_sample):
-        """Take in FLUX and convert to decoded BINARY output based on config
-
-        """
-
-        # Setup rip output path
-        self.setProjectDir(media_sample["name"])
-
-        # Go through all data in media sample
-        for data in media_sample["data"]:
-            # Check handler can work on data
-            if data["type_id"] == self.type_id:
-                # Check if handler has already worked on data
-                if self.type_id not in data["processed_by"]:
-                    # Convert data
-                    print("Converting FLUX to BINARY")
-                    data_output = self.convertFLUX(data)
-
-                    if data_output is not None:
-                        # Mark data as processed
-                        data["processed_by"].append(self.type_id)
-                        # Add new data to media sample
-                        media_sample["data"].append(data_output)
-
-        # Return media sample with new data
-        print("returning data")
-        return media_sample
 
 

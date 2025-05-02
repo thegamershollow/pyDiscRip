@@ -29,7 +29,7 @@ class DataHandlerISO9660(DataHandler):
         self.data_outputs=["Z_FILES"]
 
 
-    def convertISO9660(self,data):
+    def convertData(self,data):
         """Use 7-zip to extract files out of ISO
 
         """
@@ -55,35 +55,7 @@ class DataHandlerISO9660(DataHandler):
             # Run command
             self.osRun(cmd)
 
-            return data_files
+            return [data_files]
 
         # Only returned if an error happens
         return None
-
-
-    def convert(self, media_sample):
-        """Take in ISO and convert to files
-
-        """
-
-        # Setup rip output path
-        self.setProjectDir(media_sample["name"])
-
-        # Go through all data in media sample
-        for data in media_sample["data"]:
-            # Check handler can work on data
-            if data["type_id"] == self.type_id:
-                # Check if handler has already worked on data
-                if self.type_id not in data["processed_by"]:
-                    # Convert data
-                    print("Extract files from ISO9660 image")
-                    data_output = self.convertISO9660(data)
-
-                    if data_output is not None:
-                        # Mark data as processed
-                        data["processed_by"].append(self.type_id)
-                        # Add new data to media sample
-                        media_sample["data"].append(data_output)
-
-        # Return media sample with new data
-        return media_sample

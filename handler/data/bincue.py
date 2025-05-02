@@ -30,7 +30,7 @@ class DataHandlerBINCUE(DataHandler):
         self.data_outputs=["WAV","ISO9660"]
 
 
-    def convertBINCUE(self,data_in):
+    def convertData(self,data_in):
         """Use bchunk to extract all WAVs and ISOs from BINCUE
 
         """
@@ -106,32 +106,3 @@ class DataHandlerBINCUE(DataHandler):
         # Return all generated data
         return [data_wav,data_iso]
 
-
-    def convert(self, media_sample):
-        """Take in BINCUE and convert to WAVs and ISOs
-
-        """
-
-        # Setup rip output path
-        self.setProjectDir(media_sample["name"])
-
-        # Go through all data in media sample
-        for data in media_sample["data"]:
-            # Check handler can work on data
-            if data["type_id"] == self.type_id:
-                # Check if handler has already worked on data
-                if self.type_id not in data["processed_by"]:
-                    # Convert data
-                    print("Converting BINCUE to FLAC and ISO9660")
-                    data_outputs = self.convertBINCUE(data)
-
-                    if data_outputs is not None:
-                        # Mark data as processed
-                        data["processed_by"].append(self.type_id)
-                        # Add new data to media sample
-                        for data_new in data_outputs:
-                            if data_new is not None:
-                                media_sample["data"].append(data_new)
-
-        # Return media sample with new data
-        return media_sample

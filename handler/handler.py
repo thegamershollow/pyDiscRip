@@ -110,4 +110,34 @@ class Handler(object):
             print("Status : FAIL", exc.returncode, exc.output)
 
 
+    def convert(self, media_sample):
+        """Generic convert process for one data output
+
+        """
+
+        # Setup rip output path
+        self.setProjectDir(media_sample["name"])
+
+        # Go through all data in media sample
+        for data in media_sample["data"]:
+            # Check handler can work on data
+            if data["type_id"] == self.type_id:
+                # Check if handler has already worked on data
+                if self.type_id not in data["processed_by"]:
+                    # Convert data
+                    print(f"Converting {data["type_id"]} to {self.data_outputs[0]}")
+                    data_outputs = self.convertData(data)
+
+                    if data_outputs is not None:
+                        # Mark data as processed
+                        data["processed_by"].append(self.type_id)
+                        # Add new data to media sample
+                        for data_new in data_outputs:
+                            if data_new is not None:
+                                media_sample["data"].append(data_new)
+
+        # Return media sample with new data
+        print("returning data")
+        return media_sample
+
 
